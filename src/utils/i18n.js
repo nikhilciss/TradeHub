@@ -37,6 +37,21 @@ export const labels = {
   },
 };
 const de = {
+  "Users & company access": "Benutzer und Firmenzugriff",
+  "Create user": "Benutzer erstellen",
+  "Edit user & companies": "Benutzer und Firmen bearbeiten",
+  "Assign companies": "Firmen zuweisen",
+  "Save user & assignments": "Benutzer und Zuweisungen speichern",
+  "Assigned companies & roles": "Zugewiesene Firmen und Rollen",
+  "Search users": "Benutzer suchen",
+  "Search name or email": "Name oder E-Mail suchen",
+  "Filter by company": "Nach Firma filtern",
+  "All companies": "Alle Firmen",
+  "Account active": "Konto aktiv",
+  "Access active": "Zugriff aktiv",
+  "Company inactive": "Firma inaktiv",
+  "Manage internal staff & roles": "Interne Mitarbeiter und Rollen verwalten",
+
   "Back to B2B customer login": "Zurück zur Geschäftskunden-Anmeldung",
   "Roles & permissions": "Rollen und Berechtigungen",
   "AI configuration": "KI-Konfiguration",

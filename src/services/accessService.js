@@ -1,4 +1,4 @@
-import { profileFor } from "./roleService.js";
+import { profileFor, canAccess } from "./roleService.js";
 export const isInternalRole = (role) =>
   ["admin", "inside_sales", "field_sales"].includes(role);
 export function membershipsFor(user) {
@@ -67,5 +67,62 @@ export function updateMembership(state, userId, companyId, changes) {
     users: state.users.map((u) =>
       u.id === userId ? { ...u, memberships } : u,
     ),
+  };
+}
+
+export function saveCustomerAccount(state, actor, record) {
+  if (!canAccess(state, actor, "users"))
+    throw Error("You do not have permission to manage users.");
+  const name = record.name?.trim(),
+    email = record.email?.trim().toLowerCase();
+  if (
+    !name ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || "") ||
+    !record.password?.trim()
+  )
+    throw Error("Enter a name, valid email and public demo password.");
+  if (
+    state.users.some(
+      (u) => u.id !== record.id && u.email.trim().toLowerCase() === email,
+    )
+  )
+    throw Error("Email already exists");
+  const prior = state.users.find((u) => u.id === record.id);
+  if (prior && isInternalRole(prior.role))
+    throw Error("Manage staff accounts under Roles & permissions.");
+  const memberships = record.memberships;
+  if (!Array.isArray(memberships) || !memberships.length)
+    throw Error("Select at least one company.");
+  if (
+    new Set(memberships.map((m) => m.companyId)).size !== memberships.length ||
+    memberships.some(
+      (m) =>
+        !state.companies.some((c) => c.id === m.companyId) ||
+        !["buyer", "customer_admin"].includes(m.role) ||
+        typeof m.active !== "boolean",
+    )
+  )
+    throw Error("Invalid company assignment.");
+  const primary =
+    memberships.find((m) => m.companyId === record.companyId) || memberships[0];
+  const user = {
+    id: record.id,
+    name,
+    email,
+    password: record.password,
+    active: !!record.active,
+    companyId: primary.companyId,
+    role: primary.role,
+    memberships: memberships.map(({ companyId, role, active }) => ({
+      companyId,
+      role,
+      active,
+    })),
+  };
+  return {
+    ...state,
+    users: prior
+      ? state.users.map((u) => (u.id === user.id ? user : u))
+      : [...state.users, user],
   };
 }

@@ -8,6 +8,7 @@ import {
   enterCompany,
   updateMembership,
   safeStoreDestination,
+  saveCustomerAccount,
 } from "../src/services/accessService.js";
 import {
   placeOrder,
@@ -132,4 +133,55 @@ test("description search uses actual products and returns no invented items", ()
   const found = searchByDescription("I need a torque wrench", seed.products);
   assert.ok(found.some((p) => p.name === "Torque wrench"));
   assert.equal(searchByDescription("zzzzunknown", seed.products).length, 0);
+});
+
+test("admin creates customer with multiple memberships and company-specific roles", () => {
+  const actor = seed.users.find((u) => u.role === "admin");
+  const record = {
+    id: "new-buyer",
+    name: " New buyer ",
+    email: " NEW@DEMO.TRADEHUB ",
+    password: "Demo@123",
+    active: true,
+    memberships: [
+      { companyId: "c1", role: "buyer", active: true },
+      { companyId: "c2", role: "customer_admin", active: true },
+    ],
+  };
+  let s = saveCustomerAccount(seed, actor, record);
+  let u = s.users.find((u) => u.id === record.id);
+  assert.equal(u.email, "new@demo.tradehub");
+  assert.equal(companiesForUser(s, u).length, 2);
+  assert.equal(resolveCompany(s, u, "c2").role, "customer_admin");
+  assert.deepEqual(
+    validateSnapshot(s).users.find((x) => x.id === u.id).memberships,
+    u.memberships,
+  );
+  s = saveCustomerAccount(s, actor, {
+    ...u,
+    memberships: [{ companyId: "c2", role: "buyer", active: true }],
+  });
+  u = s.users.find((x) => x.id === u.id);
+  assert.equal(u.companyId, "c2");
+  assert.equal(resolveCompany(s, u, "c1"), null);
+  assert.throws(
+    () => saveCustomerAccount(s, actor, { ...record, id: "duplicate" }),
+    /Email already exists/,
+  );
+  assert.throws(
+    () => saveCustomerAccount(seed, actor, { ...record, memberships: [] }),
+    /at least one/,
+  );
+  assert.throws(
+    () => saveCustomerAccount(seed, seed.users[0], record),
+    /permission/,
+  );
+  assert.throws(
+    () =>
+      saveCustomerAccount(seed, actor, {
+        ...record,
+        memberships: [{ companyId: "missing", role: "buyer", active: true }],
+      }),
+    /Invalid/,
+  );
 });

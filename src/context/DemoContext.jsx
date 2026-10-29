@@ -1,3 +1,4 @@
+import { createCompany } from "../services/companyService";
 import {
   canAccess,
   saveRoleProfile,
@@ -46,6 +47,7 @@ import {
   enterCompany,
   membershipsFor,
   updateMembership,
+  saveCustomerAccount,
 } from "../services/accessService";
 const Context = createContext();
 const KEY = "tradehub-demo-v4";
@@ -284,6 +286,14 @@ export function DemoProvider({ children }) {
     deleteRole: (rid) => {
       update((s) => deleteRoleProfile(s, identity, rid));
       notify("Role deleted");
+    },
+    createCompany: (record) => {
+      update((s) => createCompany(s, identity, record));
+      notify("Company created");
+    },
+    saveCustomer: (record) => {
+      update((s) => saveCustomerAccount(s, identity, record));
+      notify("Customer user saved");
     },
     saveStaff: (record) => {
       update((s) => saveStaffAccount(s, identity, record));

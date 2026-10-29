@@ -627,6 +627,137 @@ try {
       assert.equal(JSON.stringify(await state()), before);
     },
   );
+  await step(
+    "Admin creates customer and assigns multiple companies with distinct roles",
+    async () => {
+      await login("admin@demo.tradehub", "Admin@123", true);
+      await click("Create / manage users →");
+      await click("Create user");
+      await fill("Name", "Assigned buyer");
+      await fill("Email", "assigned@demo.tradehub");
+      await click("Save user & assignments");
+      assert.ok((await body()).includes("Select at least one company."));
+      for (const name of ["Müller Maschinenbau GmbH", "Alpen Technik AG"]) {
+        await evaluate(
+          `document.querySelector('input[aria-label="Assign ${name}"]').click()`,
+        );
+        await sleep(70);
+      }
+      await fillSelector(
+        'select[aria-label="Role Alpen Technik AG"]',
+        "customer_admin",
+      );
+      await click("Save user & assignments");
+      const u = (await state()).users.find(
+        (u) => u.email === "assigned@demo.tradehub",
+      );
+      assert.equal(u.memberships.length, 2);
+      await go("/login");
+      await fill("Email", "assigned@demo.tradehub");
+      await fill("Public demo password", "Demo@123");
+      await click("Log in");
+      await wait(`location.pathname==='/companies'`);
+      assert.equal(
+        await evaluate(`document.querySelectorAll('.company-card').length`),
+        2,
+      );
+      await evaluate(
+        `[...document.querySelectorAll('.company-card')].find(e=>e.textContent.includes('Alpen Technik')).click()`,
+      );
+      await sleep(100);
+      await go("/store/account/users");
+      assert.ok((await body()).includes("Add company user"));
+      await login("admin@demo.tradehub", "Admin@123", true);
+      await go("/admin/users");
+      await click(
+        "Edit user & companies",
+        `[...document.querySelectorAll('tr')].find(e=>e.textContent.includes('assigned@demo.tradehub'))`,
+      );
+      await evaluate(
+        `document.querySelector('input[aria-label="Assign Müller Maschinenbau GmbH"]').click()`,
+      );
+      await sleep(70);
+      await click("Save user & assignments");
+      await go("/login");
+      await fill("Email", "assigned@demo.tradehub");
+      await fill("Public demo password", "Demo@123");
+      await click("Log in");
+      await wait(`location.pathname==='/companies'`);
+      assert.equal(
+        await evaluate(`document.querySelectorAll('.company-card').length`),
+        1,
+      );
+      assert.ok((await body()).includes("Alpen Technik"));
+      await login("admin@demo.tradehub", "Admin@123", true);
+      await go("/admin/users");
+      const shot = await page.call("Page.captureScreenshot", { format: "png" });
+      fs.writeFileSync(
+        output + "/users-company-access.png",
+        Buffer.from(shot.data, "base64"),
+      );
+    },
+  );
+  await step(
+    "Admin creates company, assigns user and customer checks out",
+    async () => {
+      await login("admin@demo.tradehub", "Admin@123", true);
+      await go("/admin/customers");
+      await click("+ Add company");
+      for (const [k, v] of [
+        ["Company name", "E2E New Company"],
+        ["Company code", "DE-E2E-NEW"],
+        ["City", "Berlin"],
+        ["Street", "Demo street 1"],
+        ["Postal code", "10115"],
+      ])
+        await fill(k, v);
+      await click("Create company");
+      const company = (await state()).companies.find(
+        (c) => c.code === "DE-E2E-NEW",
+      );
+      assert.ok(company);
+      assert.deepEqual((await state()).carts[company.id], []);
+      await go("/admin/customers");
+      assert.ok((await body()).includes("E2E New Company"));
+      await click("+ Add company");
+      for (const [k, v] of [
+        ["Company name", "Duplicate"],
+        ["Company code", "de-e2e-new"],
+        ["City", "Berlin"],
+        ["Street", "Demo street 1"],
+        ["Postal code", "10115"],
+      ])
+        await fill(k, v);
+      await click("Create company");
+      assert.ok((await body()).includes("Company code already exists."));
+      await go("/admin/users");
+      await click("Create user");
+      await fill("Name", "New Company Buyer");
+      await fill("Email", "new-company@demo.tradehub");
+      await evaluate(
+        `document.querySelector('input[aria-label="Assign E2E New Company"]').click()`,
+      );
+      await sleep(80);
+      await click("Save user & assignments");
+      await login(
+        "new-company@demo.tradehub",
+        "Demo@123",
+        false,
+        "E2E New Company",
+      );
+      await go("/store/products/p1");
+      await click("Add to cart");
+      await go("/store/checkout");
+      await fill("Purchase order reference", "E2E-new-company");
+      await click("Submit demo order");
+      await wait(`location.pathname==='/store/orders'`);
+      assert.equal(
+        (await state()).orders.find((o) => o.reference === "E2E-new-company")
+          .companyId,
+        company.id,
+      );
+    },
+  );
   await step("Browser runtime and network errors", async () => {
     const errors = page.events.filter(
       (e) => e.method === "Runtime.exceptionThrown",

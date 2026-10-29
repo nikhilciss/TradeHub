@@ -37,6 +37,20 @@ export function AdminDashboard() {
       >
         A shared view of customers, purchases and the ERP pipeline.
       </Heading>
+      {d.can("users") && (
+        <section className="panel user-management-entry">
+          <div>
+            <h2>Users & company access</h2>
+            <p>
+              Create customer logins, assign companies and manage purchasing
+              roles.
+            </p>
+          </div>
+          <Link className="primary" to="/admin/users">
+            Create / manage users →
+          </Link>
+        </section>
+      )}
       <div className="stats">
         {[
           ["Total orders", d.state.orders.length, "Across all demo accounts"],
@@ -117,10 +131,36 @@ export function AdminDashboard() {
 export function Customers() {
   const d = useDemo(),
     [q, setQ] = useState(""),
-    [editing, setEditing] = useState(null);
+    [editing, setEditing] = useState(null),
+    [error, setError] = useState("");
+  const isNew = editing && !d.state.companies.some((c) => c.id === editing.id);
+  const openNew = () => {
+    setError("");
+    setEditing({
+      id: id(),
+      name: "",
+      code: "",
+      tier: "Silver",
+      discount: 0,
+      approvalThreshold: d.state.settings.approvalThreshold,
+      creditLimit: 0,
+      city: "",
+      country: "DE",
+      active: true,
+      billingAddress: { street: "", postalCode: "" },
+    });
+  };
   return (
     <>
-      <Heading title="Partnerships that work." eyebrow="CUSTOMER ACCOUNTS">
+      <Heading
+        title="Partnerships that work."
+        eyebrow="CUSTOMER ACCOUNTS"
+        action={
+          <button className="primary" onClick={openNew}>
+            + Add company
+          </button>
+        }
+      >
         Negotiated pricing and purchase controls apply immediately to future
         orders.
       </Heading>
@@ -148,7 +188,9 @@ export function Customers() {
             <tbody>
               {d.state.companies
                 .filter((c) =>
-                  (c.name + c.city).toLowerCase().includes(q.toLowerCase()),
+                  (c.name + " " + c.code + " " + c.city)
+                    .toLowerCase()
+                    .includes(q.toLowerCase()),
                 )
                 .map((c) => (
                   <tr key={c.id}>
@@ -180,7 +222,10 @@ export function Customers() {
                     <td>
                       <button
                         className="secondary compact"
-                        onClick={() => setEditing({ ...c })}
+                        onClick={() => {
+                          setError("");
+                          setEditing({ ...c });
+                        }}
                       >
                         Edit
                       </button>
@@ -192,16 +237,104 @@ export function Customers() {
         </div>
       </section>
       {editing && (
-        <Modal title="Company contract" onClose={() => setEditing(null)}>
+        <Modal
+          title={isNew ? "Add company" : "Company contract"}
+          onClose={() => setEditing(null)}
+        >
           <h3>{editing.name}</h3>
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              d.edit("companies", editing);
-              d.notify("Company contract updated");
-              setEditing(null);
+              try {
+                if (isNew) d.createCompany(editing);
+                else {
+                  d.edit("companies", editing);
+                  d.notify("Company contract updated");
+                }
+                setEditing(null);
+              } catch (err) {
+                setError(err.message);
+              }
             }}
           >
+            {isNew && (
+              <>
+                <div className="two-columns">
+                  {[
+                    ["name", "Company name"],
+                    ["code", "Company code"],
+                    ["city", "City"],
+                  ].map(([key, label]) => (
+                    <label key={key}>
+                      {label}
+                      <input
+                        required
+                        value={editing[key]}
+                        onChange={(e) =>
+                          setEditing({ ...editing, [key]: e.target.value })
+                        }
+                      />
+                    </label>
+                  ))}
+                  <label>
+                    Country
+                    <select
+                      value={editing.country}
+                      onChange={(e) =>
+                        setEditing({ ...editing, country: e.target.value })
+                      }
+                    >
+                      <option value="DE">Germany</option>
+                      <option value="AT">Austria</option>
+                      <option value="CH">Switzerland</option>
+                    </select>
+                  </label>
+                </div>
+                <div className="two-columns">
+                  {[
+                    ["street", "Street"],
+                    ["postalCode", "Postal code"],
+                  ].map(([key, label]) => (
+                    <label key={key}>
+                      {label}
+                      <input
+                        required
+                        value={editing.billingAddress[key]}
+                        onChange={(e) =>
+                          setEditing({
+                            ...editing,
+                            billingAddress: {
+                              ...editing.billingAddress,
+                              [key]: e.target.value,
+                            },
+                          })
+                        }
+                      />
+                    </label>
+                  ))}
+                </div>
+                <p className="notice">
+                  This address will be used as the initial billing and delivery
+                  address. Assign users through Users & company access after
+                  saving.
+                </p>
+                <label>
+                  Credit limit (EUR)
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    value={editing.creditLimit}
+                    onChange={(e) =>
+                      setEditing({
+                        ...editing,
+                        creditLimit: Number(e.target.value),
+                      })
+                    }
+                  />
+                </label>
+              </>
+            )}
             <label>
               Contract tier
               <select
@@ -253,267 +386,21 @@ export function Customers() {
               />
               Account approved
             </label>
-            <button className="primary">Save contract</button>
+            {error && (
+              <p className="error" role="alert">
+                {error}
+              </p>
+            )}
+            <button className="primary">
+              {isNew ? "Create company" : "Save contract"}
+            </button>
           </form>
         </Modal>
       )}
     </>
   );
 }
-export function Users() {
-  const d = useDemo(),
-    [adding, setAdding] = useState(false),
-    [access, setAccess] = useState(null);
-  return (
-    <>
-      <Heading
-        title="People & permissions"
-        eyebrow="USER MANAGEMENT"
-        action={
-          <button className="primary" onClick={() => setAdding(true)}>
-            + Add demo user
-          </button>
-        }
-      >
-        Role navigation is illustrative, not a security boundary. All bundled
-        demo data is accessible.
-      </Heading>
-      <section className="panel">
-        <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Role</th>
-                <th>Company</th>
-                <th>Status</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {d.state.users.map((u) => (
-                <tr key={u.id}>
-                  <td>
-                    <b>{u.name}</b>
-                    <small>{u.email}</small>
-                  </td>
-                  <td>{roles[u.role]}</td>
-                  <td>
-                    {d.getMemberships(u).length
-                      ? d
-                          .getMemberships(u)
-                          .map(
-                            (m) =>
-                              d.state.companies.find(
-                                (c) => c.id === m.companyId,
-                              )?.name,
-                          )
-                          .join(", ")
-                      : "Internal workspace"}
-                  </td>
-                  <td>
-                    <Badge value={u.active ? "active" : "disabled"} />
-                  </td>
-                  <td>
-                    {["buyer", "customer_admin"].includes(u.role) && (
-                      <button
-                        className="secondary compact"
-                        onClick={() =>
-                          setAccess({
-                            ...u,
-                            memberships: structuredClone(d.getMemberships(u)),
-                          })
-                        }
-                      >
-                        {d.t("Company access")}
-                      </button>
-                    )}
-                    <button
-                      disabled={u.id === d.user.id}
-                      className="secondary compact"
-                      onClick={() =>
-                        (() => {
-                          try {
-                            d.edit("users", { ...u, active: !u.active });
-                          } catch (err) {
-                            d.notify(err.message);
-                          }
-                        })()
-                      }
-                    >
-                      {u.active ? "Disable" : "Enable"}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-      {access && (
-        <Modal title={d.t("Company access")} onClose={() => setAccess(null)}>
-          <h3>{access.email}</h3>
-          <p>{d.t("Choose companies and the role for each membership.")}</p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!access.memberships.length)
-                return d.notify("Select at least one company.");
-              d.edit("users", {
-                ...access,
-                companyId: access.memberships.some(
-                  (m) => m.companyId === access.companyId,
-                )
-                  ? access.companyId
-                  : access.memberships[0].companyId,
-              });
-              setAccess(null);
-              d.notify("Company access updated");
-            }}
-          >
-            {d.state.companies.map((c) => {
-              const member = access.memberships.find(
-                (m) => m.companyId === c.id,
-              );
-              return (
-                <div className="membership-row" key={c.id}>
-                  <label className="checkbox">
-                    <input
-                      type="checkbox"
-                      checked={!!member}
-                      onChange={(e) =>
-                        setAccess({
-                          ...access,
-                          memberships: e.target.checked
-                            ? [
-                                ...access.memberships,
-                                {
-                                  companyId: c.id,
-                                  role: "buyer",
-                                  active: true,
-                                },
-                              ]
-                            : access.memberships.filter(
-                                (m) => m.companyId !== c.id,
-                              ),
-                        })
-                      }
-                    />
-                    {c.name}
-                  </label>
-                  {member && (
-                    <div className="inline">
-                      <select
-                        aria-label={`${d.t("Role")} ${c.name}`}
-                        value={member.role}
-                        onChange={(e) =>
-                          setAccess({
-                            ...access,
-                            memberships: access.memberships.map((m) =>
-                              m.companyId === c.id
-                                ? { ...m, role: e.target.value }
-                                : m,
-                            ),
-                          })
-                        }
-                      >
-                        <option value="buyer">{d.t("Buyer")}</option>
-                        <option value="customer_admin">
-                          {d.t("Customer administrator")}
-                        </option>
-                      </select>
-                      <label className="checkbox">
-                        <input
-                          type="checkbox"
-                          checked={member.active}
-                          onChange={(e) =>
-                            setAccess({
-                              ...access,
-                              memberships: access.memberships.map((m) =>
-                                m.companyId === c.id
-                                  ? { ...m, active: e.target.checked }
-                                  : m,
-                              ),
-                            })
-                          }
-                        />
-                        {d.t("Active")}
-                      </label>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-            <button className="primary">{d.t("Save")}</button>
-          </form>
-        </Modal>
-      )}
-      {adding && (
-        <Modal title="Add local demo user" onClose={() => setAdding(false)}>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const f = Object.fromEntries(new FormData(e.target));
-              if (
-                d.state.users.some(
-                  (u) => u.email.toLowerCase() === f.email.toLowerCase(),
-                )
-              )
-                return d.notify("Email already exists");
-              d.update((s) => ({
-                ...s,
-                users: [
-                  ...s.users,
-                  {
-                    ...f,
-                    id: id(),
-                    active: true,
-                    password: "Demo@123",
-                    memberships: ["buyer", "customer_admin"].includes(f.role)
-                      ? [{ companyId: f.companyId, role: f.role, active: true }]
-                      : [],
-                  },
-                ],
-              }));
-              setAdding(false);
-            }}
-          >
-            <label>
-              Name
-              <input name="name" required />
-            </label>
-            <label>
-              Demo email
-              <input name="email" type="email" required />
-            </label>
-            <label>
-              Role
-              <select name="role">
-                {Object.entries(roles).map(([v, n]) => (
-                  <option key={v} value={v}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Company
-              <select name="companyId">
-                {d.state.companies.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <p>Public password: Demo@123 · No real authentication</p>
-            <button className="primary">Create local user</button>
-          </form>
-        </Modal>
-      )}
-    </>
-  );
-}
+export { UserManagement as Users } from "./admin/UserManagement";
 export function Settings() {
   const d = useDemo(),
     [reset, setReset] = useState(false),

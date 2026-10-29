@@ -2418,3 +2418,33 @@
 .category-dropdown:not([open]) > div {
   display: none;
 }
+.user-company-list {
+  white-space: normal;
+  min-width: 220px;
+}
+.user-company-list > div + div {
+  margin-top: 10px;
+}
+.company-assignment-list {
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+.user-management-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.user-management-entry h2 {
+  margin-bottom: 8px;
+}
+.user-management-entry p {
+  margin-bottom: 0;
+}
+@media (max-width: 600px) {
+  .user-management-entry {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

@@ -289,7 +289,7 @@ export function Shell() {
         ["Products", "/admin/products", Package],
         ["Categories", "/admin/categories", Layers],
         ["Customers", "/admin/customers", Users],
-        ["Users", "/admin/users", ShieldCheck],
+        ["Users & company access", "/admin/users", ShieldCheck],
         ["Odoo integration", "/admin/odoo", Workflow],
         ["Roles & permissions", "/admin/roles", ShieldCheck],
         ["AI configuration", "/admin/ai", Zap],
