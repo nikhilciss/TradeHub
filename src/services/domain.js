@@ -1,3 +1,11 @@
+import { createId as id } from "../utils/id.js";
+import { validateRoleProfiles } from "./roleService.js";
+import { sanitizeAIConfig } from "./aiConfigService.js";
+import {
+  membershipsFor,
+  isInternalRole,
+  resolveCompany,
+} from "./accessService.js";
 import {
   productVisible,
   quantityIssue,
@@ -22,7 +30,7 @@ export const priceFor = (p, c) =>
   ) / 100;
 export const totalFor = (items) =>
   Math.round(items.reduce((s, i) => s + i.qty * i.unitPrice, 0) * 100) / 100;
-export const id = () => crypto.randomUUID();
+export { createId as id } from "../utils/id.js";
 export function mergeItems(existing, incoming) {
   const map = new Map(existing.map((i) => [i.productId, { ...i }]));
   for (const i of incoming) {
@@ -63,6 +71,9 @@ export function placeOrder(
   notes,
   addresses = {},
 ) {
+  const user = state.users.find((u) => u.id === userId && u.active);
+  if (!resolveCompany(state, user, companyId))
+    throw Error("You do not have access to this company.");
   const company = state.companies.find((c) => c.id === companyId);
   if (!company.active)
     throw Error("This company account is awaiting approval.");
@@ -209,6 +220,27 @@ export function validateSnapshot(input) {
       !u.email
     )
       throw Error("Invalid user");
+  for (const user of s.users) {
+    const memberships = membershipsFor(user);
+    if (
+      !Array.isArray(memberships) ||
+      memberships.some(
+        (m) =>
+          !cs.has(m.companyId) ||
+          !["buyer", "customer_admin"].includes(m.role) ||
+          typeof m.active !== "boolean",
+      ) ||
+      new Set(memberships.map((m) => m.companyId)).size !== memberships.length
+    )
+      throw Error("Invalid company memberships");
+    if (!isInternalRole(user.role) && !memberships.length)
+      throw Error("Customer users require a company membership");
+  }
+  if (
+    new Set(s.users.map((u) => u.email.trim().toLowerCase())).size !==
+    s.users.length
+  )
+    throw Error("Duplicate user email");
   for (const inv of s.invoices)
     if (
       !s.orders.some(
@@ -294,5 +326,8 @@ export function validateSnapshot(input) {
     connectionStatus:
       s.odoo.connectionStatus === "connected" ? "connected" : "disconnected",
   };
+  validateRoleProfiles(s);
+  s.aiConfig = sanitizeAIConfig(s.aiConfig);
+  if (!Array.isArray(s.aiLogs)) throw Error("Invalid AI logs.");
   return s;
 }

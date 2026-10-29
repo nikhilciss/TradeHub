@@ -32,7 +32,7 @@ const legacy = JSON.parse(
 );
 const fresh = () => structuredClone(seed);
 
-test("version 2 seed validates relationships and representative dataset", () => {
+test("version 4 seed validates relationships and representative dataset", () => {
   const s = validateSnapshot(fresh());
   assert.equal(s.products.length, 54);
   assert.equal(s.companies.length, 6);
@@ -43,7 +43,7 @@ test("legacy migration preserves IDs, carts, order prices, discounts and templat
   old.carts.c1 = [{ productId: "p1", qty: 3 }];
   old.companies[0].discount = 33;
   const s = validateSnapshot(old);
-  assert.equal(s.version, 2);
+  assert.equal(s.version, 4);
   assert.deepEqual(s.orders, old.orders);
   assert.deepEqual(s.carts, old.carts);
   assert.equal(s.companies[0].discount, 33);

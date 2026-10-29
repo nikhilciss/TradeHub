@@ -1,46 +1,42 @@
+import { profileFor, staffLanding } from "../../services/roleService";
 import React, { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useDemo } from "../../context/DemoContext";
-import { homeFor, roles } from "../../components/UI";
+import {
+  authenticateDemo,
+  safeStoreDestination,
+} from "../../services/accessService";
 export function LoginPage({ admin = false }) {
   const d = useDemo(),
     nav = useNavigate(),
     [params] = useSearchParams();
-  const presets = d.state.users.filter((u) =>
-    admin
-      ? ["admin", "inside_sales"].includes(u.role)
-      : ["buyer", "customer_admin", "field_sales"].includes(u.role),
+  const user = d.state.users.find(
+    (u) => u.active && u.role === (admin ? "admin" : "buyer"),
   );
-  const [selected, setSelected] = useState(presets[0]?.id || ""),
-    user = presets.find((u) => u.id === selected) || presets[0];
   const [email, setEmail] = useState(user?.email || ""),
     [password, setPassword] = useState(user?.password || ""),
     [error, setError] = useState("");
-  const next = params.get("next"),
-    safeNext =
-      next && /^\/store(?:\/|\?|$)/.test(next) && !next.includes("\\")
-        ? next
-        : null;
+  const next = safeStoreDestination(params.get("next"));
   const submit = (e) => {
     e.preventDefault();
-    if (!user?.active) return setError(d.t("This demo account is disabled."));
-    if (email !== user.email || password !== user.password)
-      return setError(d.t("Use the public demo credentials shown below."));
-    d.login(user.id);
-    nav(
-      admin
-        ? "/admin"
-        : user.role === "field_sales"
-          ? "/sales"
-          : safeNext || "/store",
-      { replace: true },
-    );
+    try {
+      const account = authenticateDemo(d.state, email, password, admin);
+      d.login(account.id);
+      nav(
+        admin && account.role !== "field_sales"
+          ? staffLanding(d.state, account)
+          : "/companies?next=" + encodeURIComponent(next),
+        { replace: true },
+      );
+    } catch (err) {
+      setError(d.t(err.message));
+    }
   };
   return (
     <div className="login">
       <section className="login-story">
-        <Link className="brand" to="/store">
+        <Link className="brand" to={admin ? "/admin/login" : "/login"}>
           tradehub<span className="brand-dot">.</span>
         </Link>
         <div>
@@ -64,8 +60,11 @@ export function LoginPage({ admin = false }) {
             )}
           </p>
         </div>
-        <Link className="hero-category-link" to="/store">
-          ← {d.t("Continue shopping")}
+        <Link
+          className="hero-category-link"
+          to={admin ? "/admin/login" : "/login"}
+        >
+          {d.t("Secure business workspace")}
         </Link>
       </section>
       <section className="login-form">
@@ -84,29 +83,44 @@ export function LoginPage({ admin = false }) {
             {d.t(
               admin
                 ? "Sign in to manage catalog, orders and ERP configuration."
-                : "Log in to see your contract prices and place orders.",
+                : "Sign in, choose your company, then start ordering.",
             )}
           </p>
-          <form onSubmit={submit}>
-            <label>
-              {d.t("Demo persona")}
-              <select
-                value={selected}
-                onChange={(e) => {
-                  setSelected(e.target.value);
-                  const u = presets.find((u) => u.id === e.target.value);
-                  setEmail(u.email);
-                  setPassword(u.password);
-                  setError("");
-                }}
-              >
-                {presets.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name} · {roles[u.role]}
-                  </option>
+          {admin && (
+            <div className="staff-login-options">
+              <span className="staff-options-label">
+                {d.t("Choose a demo staff account")}
+              </span>
+              {d.state.users
+                .filter(
+                  (u) =>
+                    u.active &&
+                    ["admin", "inside_sales", "field_sales"].includes(u.role) &&
+                    profileFor(d.state, u)?.active,
+                )
+                .map((u) => (
+                  <button
+                    type="button"
+                    key={u.id}
+                    className={
+                      email === u.email
+                        ? "staff-option selected"
+                        : "staff-option"
+                    }
+                    aria-pressed={email === u.email}
+                    onClick={() => {
+                      setEmail(u.email);
+                      setPassword(u.password);
+                      setError("");
+                    }}
+                  >
+                    <strong>{profileFor(d.state, u).name}</strong>
+                    <span>{u.name}</span>
+                  </button>
                 ))}
-              </select>
-            </label>
+            </div>
+          )}
+          <form onSubmit={submit}>
             <label>
               {d.t("Email")}
               <input
@@ -139,12 +153,17 @@ export function LoginPage({ admin = false }) {
               {d.t("Log in")} <ArrowRight size={17} />
             </button>
           </form>
-          <div className="login-links">
-            <Link to="/store">{d.t("Continue shopping")}</Link>
-            <Link to={admin ? "/login" : "/admin/login"}>
-              {d.t(admin ? "Business customer login" : "Admin login")}
-            </Link>
-          </div>
+          {
+            <div className="staff-login-footer">
+              <Link
+                className="secondary full staff-login-entry"
+                to={admin ? "/login" : "/admin/login"}
+              >
+                {d.t(admin ? "Back to B2B customer login" : "Admin login")}
+                <ArrowRight size={18} aria-hidden="true" />
+              </Link>
+            </div>
+          }
         </div>
       </section>
     </div>

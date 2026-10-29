@@ -37,6 +37,32 @@ export const labels = {
   },
 };
 const de = {
+  "Back to B2B customer login": "Zurück zur Geschäftskunden-Anmeldung",
+  "Roles & permissions": "Rollen und Berechtigungen",
+  "AI configuration": "KI-Konfiguration",
+  "Staff accounts": "Mitarbeiterkonten",
+  "Choose a demo staff account": "Demo-Mitarbeiterkonto auswählen",
+  "Create role": "Rolle erstellen",
+  "Add staff account": "Mitarbeiterkonto hinzufügen",
+  "Role name": "Rollenname",
+  "Edit role": "Rolle bearbeiten",
+  "View permissions": "Berechtigungen anzeigen",
+  "Module permissions": "Modulberechtigungen",
+  "Save role": "Rolle speichern",
+  "Save staff account": "Mitarbeiterkonto speichern",
+  "Provider connection": "Anbieter-Verbindung",
+  "AI provider": "KI-Anbieter",
+  "Save configuration": "Konfiguration speichern",
+  "Test configuration": "Konfiguration testen",
+  "Reset configuration": "Konfiguration zurücksetzen",
+  "Ordering capabilities": "Bestellfunktionen",
+  "Enable ordering assistant": "Bestellassistent aktivieren",
+  "AI assistance is disabled by your administrator.":
+    "Die KI-Unterstützung wurde vom Administrator deaktiviert.",
+  "You do not have permission to access this page.":
+    "Sie haben keine Berechtigung für diese Seite.",
+  "Return to workspace": "Zurück zum Arbeitsbereich",
+
   "Shop products": "Produkte kaufen",
   "Browse categories": "Kategorien entdecken",
   "All categories": "Alle Kategorien",
@@ -474,4 +500,69 @@ Object.assign(de, {
   "Not available yet · demo placeholder":
     "Noch nicht verfügbar · Demo-Platzhalter",
   "ERP status (simulation)": "ERP-Status (Simulation)",
+});
+Object.assign(de, {
+  "YOUR BUSINESS WORKSPACES": "IHRE GESCHÄFTSBEREICHE",
+  "Choose your company": "Wählen Sie Ihr Unternehmen",
+  "Signed in as": "Angemeldet als",
+  "Select a linked company to access its catalog, contract prices and orders.":
+    "Wählen Sie ein zugeordnetes Unternehmen für Katalog, Vertragspreise und Bestellungen.",
+  "Customer administrator": "Kundenadministrator",
+  Buyer: "Einkäufer",
+  "Field sales": "Außendienst",
+  "Enter company workspace": "Unternehmensbereich öffnen",
+  "No active company access": "Kein aktiver Unternehmenszugang",
+  "Your account has no approved company memberships. Contact your company administrator.":
+    "Ihrem Konto ist kein freigegebenes Unternehmen zugeordnet. Wenden Sie sich an Ihren Administrator.",
+  "Each company has its own cart, prices, orders, invoices and purchasing permissions.":
+    "Jedes Unternehmen hat einen eigenen Warenkorb, Preise, Bestellungen, Rechnungen und Einkaufsberechtigungen.",
+  "Switch company": "Unternehmen wechseln",
+  "Select a company to continue.":
+    "Wählen Sie ein Unternehmen, um fortzufahren.",
+  "You do not have access to this company.":
+    "Sie haben keinen Zugriff auf dieses Unternehmen.",
+  "Invalid demo credentials or inactive account.":
+    "Ungültige Demo-Zugangsdaten oder inaktives Konto.",
+  "Secure business workspace": "Geschützter Unternehmensbereich",
+  "Sign in, choose your company, then start ordering.":
+    "Anmelden, Unternehmen auswählen und bestellen.",
+  "AI-assisted ordering": "KI-gestützte Bestellung",
+  "Turn copied order text into a cart you can review.":
+    "Erstellen Sie aus kopiertem Bestelltext einen prüfbaren Warenkorb.",
+  "Demo preview: deterministic local parsing, not a live AI model. No mailbox access, PDF OCR or external data transfer.":
+    "Demo-Vorschau: lokale regelbasierte Analyse, kein KI-Modell. Kein Postfachzugriff, keine PDF-OCR und keine externe Datenübertragung.",
+  "Paste email or PDF order text": "Bestelltext aus E-Mail oder PDF einfügen",
+  "Order text": "Bestelltext",
+  "Upload a text file": "Textdatei hochladen",
+  "Text file must be smaller than 1 MB.":
+    "Die Textdatei muss kleiner als 1 MB sein.",
+  "Suggest order lines": "Bestellpositionen vorschlagen",
+  "Review before ordering": "Vor der Bestellung prüfen",
+  "Copy item numbers and quantities from an email or PDF.":
+    "Kopieren Sie Artikelnummern und Mengen aus einer E-Mail oder PDF.",
+  "Review matched products, quantities and company prices.":
+    "Prüfen Sie zugeordnete Produkte, Mengen und Unternehmenspreise.",
+  "Add selected lines to this company’s cart and checkout normally.":
+    "Fügen Sie ausgewählte Positionen dem Unternehmenswarenkorb hinzu und schließen Sie die Bestellung ab.",
+  "PDF files are not read in this demo. Paste their text instead.":
+    "PDF-Dateien werden in dieser Demo nicht ausgelesen. Fügen Sie stattdessen den Text ein.",
+  Example: "Beispiel",
+  "Suggested order lines": "Vorgeschlagene Bestellpositionen",
+  Select: "Auswählen",
+  "No order lines matched. Include a SKU and quantity, or use Quick Order.":
+    "Keine Positionen gefunden. Geben Sie Artikelnummer und Menge an oder nutzen Sie die Schnellbestellung.",
+  "Added to cart": "Zum Warenkorb hinzugefügt",
+  "Add selected lines to cart": "Ausgewählte Positionen in den Warenkorb",
+  "Describe what you need": "Beschreiben Sie Ihren Bedarf",
+  "Local keyword search preview, not semantic AI search.":
+    "Vorschau der lokalen Stichwortsuche, keine semantische KI-Suche.",
+  "Example: torque wrench for workshop maintenance":
+    "Beispiel: Drehmomentschlüssel für Werkstattwartung",
+  "Quantity is missing. Add it in Quick Order.":
+    "Menge fehlt. Ergänzen Sie sie in der Schnellbestellung.",
+  "Company access": "Unternehmenszugriff",
+  "Choose companies and the role for each membership.":
+    "Wählen Sie Unternehmen und die jeweilige Rolle.",
+  "Select at least one company.": "Wählen Sie mindestens ein Unternehmen.",
+  "Company access updated": "Unternehmenszugriff aktualisiert",
 });

@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 4,
   "companies": [
     {
       "id": "c1",
@@ -178,7 +178,19 @@
       "password": "Demo@123",
       "role": "buyer",
       "companyId": "c1",
-      "active": true
+      "active": true,
+      "memberships": [
+        {
+          "companyId": "c1",
+          "role": "buyer",
+          "active": true
+        },
+        {
+          "companyId": "c2",
+          "role": "buyer",
+          "active": true
+        }
+      ]
     },
     {
       "id": "u2",
@@ -187,7 +199,19 @@
       "password": "Demo@123",
       "role": "customer_admin",
       "companyId": "c1",
-      "active": true
+      "active": true,
+      "memberships": [
+        {
+          "companyId": "c1",
+          "role": "customer_admin",
+          "active": true
+        },
+        {
+          "companyId": "c2",
+          "role": "buyer",
+          "active": true
+        }
+      ]
     },
     {
       "id": "u3",
@@ -196,7 +220,9 @@
       "password": "Admin@123",
       "role": "admin",
       "companyId": "c1",
-      "active": true
+      "active": true,
+      "memberships": [],
+      "staffRoleId": "system-admin"
     },
     {
       "id": "u4",
@@ -205,7 +231,9 @@
       "password": "Sales@123",
       "role": "field_sales",
       "companyId": "c1",
-      "active": true
+      "active": true,
+      "memberships": [],
+      "staffRoleId": "field-sales"
     },
     {
       "id": "u5",
@@ -214,7 +242,9 @@
       "password": "Support@123",
       "role": "inside_sales",
       "companyId": "c1",
-      "active": true
+      "active": true,
+      "memberships": [],
+      "staffRoleId": "inside-sales"
     }
   ],
   "products": [
@@ -2703,5 +2733,62 @@
       "featured": false
     }
   ],
-  "recentlyViewed": {}
+  "recentlyViewed": {},
+  "roleProfiles": [
+    {
+      "id": "system-admin",
+      "name": "System administrator",
+      "description": "Full internal administration access.",
+      "active": true,
+      "system": true,
+      "permissions": [
+        "dashboard",
+        "orders",
+        "products",
+        "categories",
+        "customers",
+        "users",
+        "roles",
+        "odoo",
+        "ai",
+        "settings",
+        "sales"
+      ]
+    },
+    {
+      "id": "inside-sales",
+      "name": "Inside sales",
+      "description": "Customer support and order processing.",
+      "active": true,
+      "system": false,
+      "permissions": ["dashboard", "orders", "customers"]
+    },
+    {
+      "id": "field-sales",
+      "name": "Field sales",
+      "description": "Select customer accounts and prepare on-site orders.",
+      "active": true,
+      "system": false,
+      "permissions": ["sales"]
+    }
+  ],
+  "aiConfig": {
+    "enabled": true,
+    "provider": "local_demo",
+    "name": "TradeHub order assistant",
+    "endpoint": "https://ai-demo.example.invalid",
+    "model": "demo-order-parser",
+    "deployment": "",
+    "apiVersion": "demo",
+    "timeout": 30,
+    "maxTokens": 1500,
+    "temperature": 0.2,
+    "textOrders": true,
+    "descriptionSearch": true,
+    "requireReview": true,
+    "retainInput": false,
+    "status": "not_tested",
+    "lastTest": null
+  },
+  "aiLogs": []
 }

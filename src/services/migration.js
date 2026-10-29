@@ -1,3 +1,5 @@
+import { defaultRoleProfiles } from "./roleService.js";
+import { defaultAIConfig } from "./aiConfigService.js";
 import { slugify } from "./catalogService.js";
 import {
   defaultConnection,
@@ -17,10 +19,12 @@ const names = [
   ["Maintenance Supplies", "Wartungsbedarf", "Tools"],
 ];
 export function migrateState(input) {
-  if (!input || ![1, 2].includes(input.version))
+  if (!input || ![1, 2, 3, 4].includes(input.version))
     throw Error("Unsupported snapshot version");
   const s = structuredClone(input);
-  if (s.version === 2) return s;
+  if (s.version === 4) return s;
+  if (s.version === 3) return addAdminConfig(s);
+  if (s.version === 2) return addMemberships(s);
   s.categories = names.map(([name, nameDe, illustration], i) => ({
     id: `cat-${i + 1}`,
     name,
@@ -156,5 +160,56 @@ export function migrateState(input) {
     failedCount: l.status === "error" ? 1 : 0,
   }));
   s.version = 2;
+  return addMemberships(s);
+}
+
+function addMemberships(s) {
+  s.users = s.users.map((u) => ({
+    ...u,
+    memberships: ["buyer", "customer_admin"].includes(u.role)
+      ? [{ companyId: u.companyId, role: u.role, active: true }]
+      : [],
+  }));
+  s.version = 3;
+  return addAdminConfig(s);
+}
+
+function addAdminConfig(s) {
+  s.roleProfiles = structuredClone(defaultRoleProfiles);
+  s.aiConfig = structuredClone(defaultAIConfig);
+  s.aiLogs = [];
+  s.users = s.users.map((u) => ({
+    ...u,
+    ...(["admin", "inside_sales", "field_sales"].includes(u.role)
+      ? {
+          staffRoleId: {
+            admin: "system-admin",
+            inside_sales: "inside-sales",
+            field_sales: "field-sales",
+          }[u.role],
+        }
+      : {}),
+  }));
+  // One-time upgrade of the known public sample buyer only; preserve all other customers and demo edits.
+  const buyer = s.users.find(
+    (u) => u.id === "u1" && u.email.toLowerCase() === "buyer@demo.tradehub",
+  );
+  if (
+    buyer &&
+    s.companies.some((c) => c.id === "c1") &&
+    s.companies.some((c) => c.id === "c2")
+  ) {
+    const old = buyer.memberships || [];
+    buyer.memberships = ["c1", "c2"].map((companyId) => ({
+      ...old.find((m) => m.companyId === companyId),
+      companyId,
+      role: "buyer",
+      active: true,
+    }));
+    s.companies = s.companies.map((c) =>
+      ["c1", "c2"].includes(c.id) ? { ...c, active: true } : c,
+    );
+  }
+  s.version = 4;
   return s;
 }

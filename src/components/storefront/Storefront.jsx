@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Link,
   NavLink,
@@ -22,7 +22,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useDemo } from "../../context/DemoContext";
-import { Art, homeFor, roles } from "../UI";
+import { Art } from "../UI";
 import { money } from "../../services/domain";
 import { categoryVisible } from "../../services/catalogService";
 export const categoryName = (category, lang) =>
@@ -209,10 +209,51 @@ export function StorefrontShell() {
   const [search, setSearch] = useState(""),
     [category, setCategory] = useState(""),
     [menu, setMenu] = useState(false);
+  const accountDropdown = useRef(null);
+  const categoryDropdown = useRef(null);
+  const mobileMenu = useRef(null);
+  const mobileMenuButton = useRef(null);
+  const location = useLocation();
+  useEffect(() => {
+    const dismiss = (event) => {
+      const escape = event.type === "keydown" && event.key === "Escape";
+      if (event.type === "keydown" && !escape) return;
+      for (const ref of [accountDropdown, categoryDropdown]) {
+        const dropdown = ref.current;
+        if (dropdown?.open && (escape || !dropdown.contains(event.target))) {
+          dropdown.open = false;
+          if (escape) dropdown.querySelector("summary")?.focus();
+        }
+      }
+      if (
+        menu &&
+        (escape ||
+          (!mobileMenu.current?.contains(event.target) &&
+            !mobileMenuButton.current?.contains(event.target)))
+      ) {
+        setMenu(false);
+        if (escape) mobileMenuButton.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", dismiss, true);
+    document.addEventListener("keydown", dismiss, true);
+    return () => {
+      document.removeEventListener("pointerdown", dismiss, true);
+      document.removeEventListener("keydown", dismiss, true);
+    };
+  }, [menu]);
+  useEffect(() => {
+    for (const ref of [accountDropdown, categoryDropdown]) {
+      if (ref.current) ref.current.open = false;
+    }
+    setMenu(false);
+  }, [location.pathname, location.search]);
   const categories = d
     .getCategories()
     .filter((c) => categoryVisible(d.state.categories, c.id));
   const accountLinks = [
+    ["Switch company", "/companies"],
+    ["AI-assisted ordering", "/store/ai-preview"],
     ["Account overview", "/store/account"],
     ["Company profile", "/store/account/company"],
     ["Order history", "/store/orders"],
@@ -289,7 +330,7 @@ export function StorefrontShell() {
               {d.lang.toUpperCase()} ▾
             </button>
             {d.user ? (
-              <details className="account-dropdown">
+              <details className="account-dropdown" ref={accountDropdown}>
                 <summary>
                   <User size={21} />
                   <span>
@@ -312,34 +353,11 @@ export function StorefrontShell() {
                       {d.t(label)}
                     </Link>
                   ))}
-                  <label>
-                    {d.t("Switch demo persona")}
-                    <select
-                      aria-label={d.t("Switch demo persona")}
-                      value={d.user.id}
-                      onChange={(e) => {
-                        const u = d.state.users.find(
-                          (u) => u.id === e.target.value,
-                        );
-                        d.login(u.id);
-                        nav(homeFor(u.role));
-                        e.target.closest("details").removeAttribute("open");
-                      }}
-                    >
-                      {d.state.users
-                        .filter((u) => u.active)
-                        .map((u) => (
-                          <option key={u.id} value={u.id}>
-                            {u.name} · {roles[u.role]}
-                          </option>
-                        ))}
-                    </select>
-                  </label>
                   <button
                     className="text-link"
                     onClick={() => {
                       d.login("");
-                      nav("/store");
+                      nav("/login");
                     }}
                   >
                     {d.t("Sign out")}
@@ -362,12 +380,22 @@ export function StorefrontShell() {
           </div>
         </div>
         <nav className="shop-navigation">
-          <button className="shop-menu-toggle" onClick={() => setMenu(!menu)}>
+          <button
+            ref={mobileMenuButton}
+            className="shop-menu-toggle"
+            aria-expanded={menu}
+            aria-controls="shop-category-menu"
+            onClick={() => setMenu(!menu)}
+          >
             <Menu size={17} />
             {d.t("Categories")}
           </button>
-          <div className={"shop-nav-links " + (menu ? "expanded" : "")}>
-            <details className="category-dropdown">
+          <div
+            ref={mobileMenu}
+            id="shop-category-menu"
+            className={"shop-nav-links " + (menu ? "expanded" : "")}
+          >
+            <details className="category-dropdown" ref={categoryDropdown}>
               <summary>
                 <Menu size={17} />
                 {d.t("All categories")}
@@ -404,6 +432,9 @@ export function StorefrontShell() {
             <NavLink to="/store/quick-order">
               <Zap size={15} />
               {d.t("Quick order")}
+            </NavLink>
+            <NavLink to="/store/ai-preview">
+              {d.t("AI-assisted ordering")}
             </NavLink>
             <NavLink to="/store/orders">{d.t("Orders")}</NavLink>
           </div>

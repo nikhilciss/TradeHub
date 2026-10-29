@@ -1,3 +1,14 @@
+import {
+  canAccess,
+  saveRoleProfile,
+  deleteRoleProfile,
+  saveStaffAccount,
+  validateRoleProfiles,
+} from "../services/roleService";
+import {
+  sanitizeAIConfig,
+  testAIConfiguration,
+} from "../services/aiConfigService";
 import React, {
   createContext,
   useContext,
@@ -29,8 +40,15 @@ import {
   logEntry,
 } from "../services/odooService";
 import { translate } from "../utils/i18n";
+import {
+  companiesForUser,
+  resolveCompany,
+  enterCompany,
+  membershipsFor,
+  updateMembership,
+} from "../services/accessService";
 const Context = createContext();
-const KEY = "tradehub-demo-v2";
+const KEY = "tradehub-demo-v4";
 const read = (key, fallback = "") => {
   try {
     return localStorage.getItem(key) || fallback;
@@ -41,7 +59,11 @@ const read = (key, fallback = "") => {
 const fresh = () => migrateState(seed);
 export function DemoProvider({ children }) {
   const [initial] = useState(() => {
-    const raw = read(KEY) || read("tradehub-demo-v1");
+    const raw =
+      read(KEY) ||
+      read("tradehub-demo-v3") ||
+      read("tradehub-demo-v2") ||
+      read("tradehub-demo-v1");
     try {
       return {
         state: raw ? validateSnapshot(JSON.parse(raw)) : fresh(),
@@ -66,20 +88,37 @@ export function DemoProvider({ children }) {
   const [storageError, setStorageError] = useState(initial.warning);
   const [state, setState] = useState(initial.state);
   const stateRef = useRef(state);
-  const [userId, setUserId] = useState(() => read("tradehub-user"));
-  const [companyId, setCompanyId] = useState(() =>
-    read("tradehub-company", "c1"),
-  );
+  const [session, setSession] = useState(() => {
+    try {
+      const value = JSON.parse(read("tradehub-session-v3", "{}"));
+      return value && typeof value === "object" ? value : {};
+    } catch {
+      return {};
+    }
+  });
+  const userId = session.userId || "";
+  const companyId = session.companyId || "";
+  const login = (id) => setSession({ userId: id, companyId: "" });
+  const setCompanyId = (cid) => {
+    enterCompany(stateRef.current, identity, cid);
+    setSession({ userId, companyId: cid });
+  };
   const [lang, setLang] = useState(() =>
     read("tradehub-lang", "en") === "de" ? "de" : "en",
   );
   const [toast, setToast] = useState("");
-  const user = state.users.find((u) => u.id === userId && u.active);
+  const identity = state.users.find((u) => u.id === userId && u.active);
+  const association = resolveCompany(state, identity, companyId);
+  const selectedCompany = association?.company || null;
+  const accessibleCompanies = companiesForUser(state, identity);
+  const user = identity
+    ? { ...identity, role: association?.role || identity.role }
+    : null;
+  // Internal dashboards still need an illustrative company context. Store routes require selectedCompany.
   const company =
-    state.companies.find(
-      (c) =>
-        c.id === (user?.role === "field_sales" ? companyId : user?.companyId),
-    ) || state.companies[0];
+    selectedCompany ||
+    state.companies.find((c) => c.id === identity?.companyId) ||
+    state.companies[0];
   const t = (key) => translate(lang, key);
   const persist = (key, value) => {
     try {
@@ -94,11 +133,8 @@ export function DemoProvider({ children }) {
     persist(KEY, JSON.stringify(state));
   }, [state]);
   useEffect(() => {
-    persist("tradehub-user", userId);
-  }, [userId]);
-  useEffect(() => {
-    persist("tradehub-company", companyId);
-  }, [companyId]);
+    persist("tradehub-session-v3", JSON.stringify(session));
+  }, [session]);
   useEffect(() => {
     persist("tradehub-lang", lang);
     document.documentElement.lang = lang;
@@ -127,7 +163,11 @@ export function DemoProvider({ children }) {
     }
   };
   const cart = state.carts[company.id] || [];
-  const add = (items) => {
+  const add = (items, { atomic = false } = {}) => {
+    if (!selectedCompany) {
+      notify("Select a company to continue.");
+      return false;
+    }
     const valid = [],
       errors = [];
     const current = stateRef.current;
@@ -142,6 +182,10 @@ export function DemoProvider({ children }) {
           : quantityIssue(p, total);
       if (issue) errors.push(`${p?.sku || item.productId}: ${t(issue)}`);
       else valid.push(item);
+    }
+    if (atomic && errors.length) {
+      notify(errors.join(" "));
+      return false;
     }
     if (valid.length)
       update((s) => ({
@@ -161,6 +205,7 @@ export function DemoProvider({ children }) {
     return errors.length === 0 && valid.length > 0;
   };
   const setQty = (productId, qty) => {
+    if (!selectedCompany) return notify("Select a company to continue.");
     if (qty !== 0) {
       const p = state.products.find((p) => p.id === productId);
       const error = quantityIssue(p, qty);
@@ -186,6 +231,7 @@ export function DemoProvider({ children }) {
           x.id === record.id ? record : x,
         ),
       };
+      if (collection === "users") validateRoleProfiles(next);
       if (collection === "orders") next = queueOrder(next, record);
       return next;
     });
@@ -208,10 +254,17 @@ export function DemoProvider({ children }) {
     update,
     mutate,
     user,
+    identity,
+    selectedCompany,
+    accessibleCompanies,
     company,
     companyId,
     setCompanyId,
-    login: setUserId,
+    login,
+    clearCompany: () => setSession({ userId, companyId: "" }),
+    getMemberships: membershipsFor,
+    updateMembership: (uid, cid, changes) =>
+      update((s) => updateMembership(s, uid, cid, changes)),
     lang,
     setLang,
     t,
@@ -223,6 +276,55 @@ export function DemoProvider({ children }) {
     setQty,
     edit,
     sync,
+    can: (permission) => canAccess(state, identity, permission),
+    saveRole: (record) => {
+      update((s) => saveRoleProfile(s, identity, record));
+      notify("Role saved");
+    },
+    deleteRole: (rid) => {
+      update((s) => deleteRoleProfile(s, identity, rid));
+      notify("Role deleted");
+    },
+    saveStaff: (record) => {
+      update((s) => saveStaffAccount(s, identity, record));
+      notify("Staff account saved");
+    },
+    saveAIConfig: (config) => {
+      if (!canAccess(stateRef.current, identity, "ai"))
+        throw Error("Access denied");
+      const safe = sanitizeAIConfig(config);
+      update((s) => ({
+        ...s,
+        aiConfig: {
+          ...safe,
+          status: "not_tested",
+          lastTest: s.aiConfig.lastTest,
+        },
+      }));
+      notify("AI configuration saved");
+    },
+    testAIConfig: (config, fail = false) => {
+      if (!canAccess(stateRef.current, identity, "ai"))
+        throw Error("Access denied");
+      const result = testAIConfiguration(config, fail);
+      update((s) => ({
+        ...s,
+        aiConfig: result,
+        aiLogs: [
+          {
+            id: id(),
+            date: result.lastTest,
+            status: result.status,
+            provider: result.provider,
+            details:
+              "Local configuration simulation only. No external API request.",
+          },
+          ...s.aiLogs,
+        ],
+      }));
+      notify("AI configuration test complete");
+      return result;
+    },
     price: (p) => priceFor(p, company),
     getProducts: (visible = false) =>
       state.products.filter(
@@ -257,10 +359,12 @@ export function DemoProvider({ children }) {
     deleteProduct: (pid) => update((s) => removeProduct(s, pid)),
     getOrders: () => state.orders,
     getCart: (cid) => state.carts[cid] || [],
-    checkout: (reference, notes, addresses) =>
-      update((s) =>
-        placeOrder(s, company.id, user.id, reference, notes, addresses),
-      ),
+    checkout: (reference, notes, addresses) => {
+      if (!selectedCompany) throw Error("Select a company to continue.");
+      return update((s) =>
+        placeOrder(s, selectedCompany.id, user.id, reference, notes, addresses),
+      );
+    },
     favorite: (pid) =>
       update((s) => {
         const old = s.favorites[company.id] || [];
@@ -339,13 +443,13 @@ export function DemoProvider({ children }) {
     },
     reset: () => {
       update(() => fresh());
-      setCompanyId("c1");
+      setSession({ userId, companyId: "" });
       notify("Seed data restored");
     },
     importData: (s) => {
       const validated = validateSnapshot(s);
       update(() => validated);
-      setCompanyId(validated.companies[0].id);
+      setSession({ userId, companyId: "" });
       notify("Snapshot imported");
     },
   };

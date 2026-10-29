@@ -202,7 +202,9 @@ export function Account() {
                     {d.state.users
                       .filter(
                         (u) =>
-                          u.companyId === d.company.id &&
+                          d
+                            .getMemberships(u)
+                            .some((m) => m.companyId === d.company.id) &&
                           ["buyer", "customer_admin"].includes(u.role),
                       )
                       .map((u) => (
@@ -211,23 +213,48 @@ export function Account() {
                           <td>{u.email}</td>
                           <td>
                             {d.t(
-                              u.role === "buyer"
+                              d
+                                .getMemberships(u)
+                                .find((m) => m.companyId === d.company.id)
+                                ?.role === "buyer"
                                 ? "Business account"
                                 : "User management",
                             )}
                           </td>
                           <td>
-                            <Badge value={u.active ? "active" : "disabled"} />
+                            <Badge
+                              value={
+                                u.active &&
+                                d
+                                  .getMemberships(u)
+                                  .find((m) => m.companyId === d.company.id)
+                                  ?.active
+                                  ? "active"
+                                  : "disabled"
+                              }
+                            />
                           </td>
                           <td>
                             <button
                               className="secondary compact"
                               disabled={u.id === d.user.id}
                               onClick={() =>
-                                d.edit("users", { ...u, active: !u.active })
+                                d.updateMembership(u.id, d.company.id, {
+                                  active: !d
+                                    .getMemberships(u)
+                                    .find((m) => m.companyId === d.company.id)
+                                    ?.active,
+                                })
                               }
                             >
-                              {d.t(u.active ? "Disable" : "Enable")}
+                              {d.t(
+                                d
+                                  .getMemberships(u)
+                                  .find((m) => m.companyId === d.company.id)
+                                  ?.active
+                                  ? "Disable"
+                                  : "Enable",
+                              )}
                             </button>
                           </td>
                         </tr>
@@ -309,6 +336,9 @@ export function Account() {
                     ...f,
                     id: id(),
                     companyId: d.company.id,
+                    memberships: [
+                      { companyId: d.company.id, role: f.role, active: true },
+                    ],
                     password: "Demo@123",
                     active: true,
                   },
@@ -348,7 +378,7 @@ export function Account() {
 }
 export function BulkOrder() {
   const d = useDemo(),
-    [rows, setRows] = useState([{ key: id(), sku: "", qty: 1 }]),
+    [rows, setRows] = useState(() => [{ key: id(), sku: "", qty: 1 }]),
     [csv, setCSV] = useState("SKU,quantity\nPNE-3201,2"),
     [review, setReview] = useState(null);
   const validate = (text) => {
@@ -418,7 +448,10 @@ export function BulkOrder() {
                 className="icon-btn"
                 aria-label={d.t("Remove")}
                 disabled={rows.length === 1}
-                onClick={() => setRows(rows.filter((r) => r.key !== row.key))}
+                onClick={() => {
+                  setRows(rows.filter((r) => r.key !== row.key));
+                  setReview(null);
+                }}
               >
                 ×
               </button>
@@ -434,7 +467,10 @@ export function BulkOrder() {
           <div className="inline">
             <button
               className="secondary"
-              onClick={() => setRows([...rows, { key: id(), sku: "", qty: 1 }])}
+              onClick={() => {
+                setRows([...rows, { key: id(), sku: "", qty: 1 }]);
+                setReview(null);
+              }}
             >
               + {d.t("Add row")}
             </button>

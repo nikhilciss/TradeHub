@@ -1,3 +1,4 @@
+import { createId } from "../utils/id.js";
 export const syncDefinitions = [
   ["Products", "Odoo → Portal", "products"],
   ["Product Categories", "Odoo → Portal", "categories"],
@@ -112,7 +113,7 @@ export function logEntry(
 ) {
   const now = new Date().toISOString();
   return {
-    id: crypto.randomUUID(),
+    id: createId(),
     entity,
     direction: entity === "Orders" ? "Portal → Odoo" : "Odoo → Portal",
     date: now,

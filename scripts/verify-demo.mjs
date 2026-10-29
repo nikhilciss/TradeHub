@@ -8,6 +8,7 @@ assert.deepEqual(seed, JSON.parse(fs.readFileSync("public/seed.json")));
 const source = fs.readFileSync("src/App.jsx", "utf8");
 for (const path of [
   "/login",
+  "/companies",
   "/admin/login",
   "/admin/categories",
   "/store/checkout",

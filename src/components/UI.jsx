@@ -1,3 +1,4 @@
+import { routePermissions, staffLanding } from "../services/roleService";
 import React, { useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
@@ -290,8 +291,10 @@ export function Shell() {
         ["Customers", "/admin/customers", Users],
         ["Users", "/admin/users", ShieldCheck],
         ["Odoo integration", "/admin/odoo", Workflow],
+        ["Roles & permissions", "/admin/roles", ShieldCheck],
+        ["AI configuration", "/admin/ai", Zap],
         ["Settings", "/admin/settings", Settings],
-      ]
+      ].filter(([, path]) => d.can(routePermissions[path]))
     : sales
       ? [
           ["Overview", "/sales", LayoutDashboard],
@@ -315,7 +318,10 @@ export function Shell() {
   return (
     <div className={"app " + (open ? "admin-collapsed" : "")}>
       <aside className={"sidebar " + (open ? "open" : "")}>
-        <Link className="brand" to={homeFor(d.user.role)}>
+        <Link
+          className="brand"
+          to={admin ? staffLanding(d.state, d.identity) : homeFor(d.user.role)}
+        >
           <span className="brand-mark">
             t<span>h</span>
           </span>
@@ -411,33 +417,19 @@ export function Shell() {
             >
               {d.lang.toUpperCase()} / {d.lang === "en" ? "DE" : "EN"}
             </button>
-            <Link className="cart-button" aria-label="Cart" to="/store/cart">
-              <ShoppingCart size={20} />
-              <span>{d.cart.reduce((s, i) => s + i.qty, 0)}</span>
-            </Link>
+            {!admin && (
+              <Link className="cart-button" aria-label="Cart" to="/store/cart">
+                <ShoppingCart size={20} />
+                <span>{d.cart.reduce((s, i) => s + i.qty, 0)}</span>
+              </Link>
+            )}
             <span className="avatar">
               {d.user.name
                 .split(" ")
                 .map((x) => x[0])
                 .join("")}
             </span>
-            <select
-              aria-label="Switch demo persona"
-              value={d.user.id}
-              onChange={(e) => {
-                const u = d.state.users.find((u) => u.id === e.target.value);
-                d.login(u.id);
-                navigate(homeFor(u.role));
-              }}
-            >
-              {d.state.users
-                .filter((u) => u.active)
-                .map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name} · {roles[u.role]}
-                  </option>
-                ))}
-            </select>
+            <span className="current-user-name">{d.user.name}</span>
             <button
               className="icon-btn"
               title="Sign out"

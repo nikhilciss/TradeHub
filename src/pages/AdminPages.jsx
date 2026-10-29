@@ -157,8 +157,11 @@ export function Customers() {
                       <small>
                         {c.code} ·{" "}
                         {
-                          d.state.users.filter((u) => u.companyId === c.id)
-                            .length
+                          d.state.users.filter((u) =>
+                            d
+                              .getMemberships(u)
+                              .some((m) => m.companyId === c.id),
+                          ).length
                         }{" "}
                         linked users
                       </small>
@@ -259,7 +262,8 @@ export function Customers() {
 }
 export function Users() {
   const d = useDemo(),
-    [adding, setAdding] = useState(false);
+    [adding, setAdding] = useState(false),
+    [access, setAccess] = useState(null);
   return (
     <>
       <Heading
@@ -295,17 +299,46 @@ export function Users() {
                   </td>
                   <td>{roles[u.role]}</td>
                   <td>
-                    {d.state.companies.find((c) => c.id === u.companyId)?.name}
+                    {d.getMemberships(u).length
+                      ? d
+                          .getMemberships(u)
+                          .map(
+                            (m) =>
+                              d.state.companies.find(
+                                (c) => c.id === m.companyId,
+                              )?.name,
+                          )
+                          .join(", ")
+                      : "Internal workspace"}
                   </td>
                   <td>
                     <Badge value={u.active ? "active" : "disabled"} />
                   </td>
                   <td>
+                    {["buyer", "customer_admin"].includes(u.role) && (
+                      <button
+                        className="secondary compact"
+                        onClick={() =>
+                          setAccess({
+                            ...u,
+                            memberships: structuredClone(d.getMemberships(u)),
+                          })
+                        }
+                      >
+                        {d.t("Company access")}
+                      </button>
+                    )}
                     <button
                       disabled={u.id === d.user.id}
                       className="secondary compact"
                       onClick={() =>
-                        d.edit("users", { ...u, active: !u.active })
+                        (() => {
+                          try {
+                            d.edit("users", { ...u, active: !u.active });
+                          } catch (err) {
+                            d.notify(err.message);
+                          }
+                        })()
                       }
                     >
                       {u.active ? "Disable" : "Enable"}
@@ -317,19 +350,129 @@ export function Users() {
           </table>
         </div>
       </section>
+      {access && (
+        <Modal title={d.t("Company access")} onClose={() => setAccess(null)}>
+          <h3>{access.email}</h3>
+          <p>{d.t("Choose companies and the role for each membership.")}</p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!access.memberships.length)
+                return d.notify("Select at least one company.");
+              d.edit("users", {
+                ...access,
+                companyId: access.memberships.some(
+                  (m) => m.companyId === access.companyId,
+                )
+                  ? access.companyId
+                  : access.memberships[0].companyId,
+              });
+              setAccess(null);
+              d.notify("Company access updated");
+            }}
+          >
+            {d.state.companies.map((c) => {
+              const member = access.memberships.find(
+                (m) => m.companyId === c.id,
+              );
+              return (
+                <div className="membership-row" key={c.id}>
+                  <label className="checkbox">
+                    <input
+                      type="checkbox"
+                      checked={!!member}
+                      onChange={(e) =>
+                        setAccess({
+                          ...access,
+                          memberships: e.target.checked
+                            ? [
+                                ...access.memberships,
+                                {
+                                  companyId: c.id,
+                                  role: "buyer",
+                                  active: true,
+                                },
+                              ]
+                            : access.memberships.filter(
+                                (m) => m.companyId !== c.id,
+                              ),
+                        })
+                      }
+                    />
+                    {c.name}
+                  </label>
+                  {member && (
+                    <div className="inline">
+                      <select
+                        aria-label={`${d.t("Role")} ${c.name}`}
+                        value={member.role}
+                        onChange={(e) =>
+                          setAccess({
+                            ...access,
+                            memberships: access.memberships.map((m) =>
+                              m.companyId === c.id
+                                ? { ...m, role: e.target.value }
+                                : m,
+                            ),
+                          })
+                        }
+                      >
+                        <option value="buyer">{d.t("Buyer")}</option>
+                        <option value="customer_admin">
+                          {d.t("Customer administrator")}
+                        </option>
+                      </select>
+                      <label className="checkbox">
+                        <input
+                          type="checkbox"
+                          checked={member.active}
+                          onChange={(e) =>
+                            setAccess({
+                              ...access,
+                              memberships: access.memberships.map((m) =>
+                                m.companyId === c.id
+                                  ? { ...m, active: e.target.checked }
+                                  : m,
+                              ),
+                            })
+                          }
+                        />
+                        {d.t("Active")}
+                      </label>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            <button className="primary">{d.t("Save")}</button>
+          </form>
+        </Modal>
+      )}
       {adding && (
         <Modal title="Add local demo user" onClose={() => setAdding(false)}>
           <form
             onSubmit={(e) => {
               e.preventDefault();
               const f = Object.fromEntries(new FormData(e.target));
-              if (d.state.users.some((u) => u.email === f.email))
+              if (
+                d.state.users.some(
+                  (u) => u.email.toLowerCase() === f.email.toLowerCase(),
+                )
+              )
                 return d.notify("Email already exists");
               d.update((s) => ({
                 ...s,
                 users: [
                   ...s.users,
-                  { ...f, id: id(), active: true, password: "Demo@123" },
+                  {
+                    ...f,
+                    id: id(),
+                    active: true,
+                    password: "Demo@123",
+                    memberships: ["buyer", "customer_admin"].includes(f.role)
+                      ? [{ companyId: f.companyId, role: f.role, active: true }]
+                      : [],
+                  },
                 ],
               }));
               setAdding(false);
@@ -610,7 +753,7 @@ export function Sales() {
                 className="secondary"
                 disabled={offline}
                 onClick={() => {
-                  d.add(x.items);
+                  if (!d.add(x.items, { atomic: true })) return;
                   d.update((s) => ({
                     ...s,
                     drafts: s.drafts.filter((y) => y.id !== x.id),
