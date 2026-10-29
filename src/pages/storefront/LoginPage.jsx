@@ -1,3 +1,4 @@
+import { LanguageSelector } from "../../components/LanguageSelector";
 import { profileFor, staffLanding } from "../../services/roleService";
 import React, { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -37,20 +38,23 @@ export function LoginPage({ admin = false }) {
     <div className="login">
       <section className="login-story">
         <Link className="brand" to={admin ? "/admin/login" : "/login"}>
-          tradehub<span className="brand-dot">.</span>
+          {d.t("tradehub")}
+          <span className="brand-dot">.</span>
         </Link>
         <div>
           <div className="eyebrow">
-            {admin ? "INTERNAL OPERATIONS" : "YOUR BUSINESS. BETTER CONNECTED."}
+            {d.t(
+              admin
+                ? "INTERNAL OPERATIONS"
+                : "YOUR BUSINESS. BETTER CONNECTED.",
+            )}
           </div>
           <h1>
-            {admin
-              ? d.lang === "de"
-                ? "Ein Überblick. Alle Abläufe."
-                : "One view. Every operation."
-              : d.lang === "de"
-                ? "Ihr Sortiment. Ihre Preise. Ihr Geschäft."
-                : "Your products. Your prices. Your business."}
+            {d.t(
+              admin
+                ? "One view. Every operation."
+                : "Your products. Your prices. Your business.",
+            )}
           </h1>
           <p>
             {d.t(
@@ -71,12 +75,7 @@ export function LoginPage({ admin = false }) {
         <div className="login-card">
           <div className="section-title">
             <span className="badge synced">{d.t("Local demo only")}</span>
-            <button
-              className="language"
-              onClick={() => d.setLang(d.lang === "en" ? "de" : "en")}
-            >
-              {d.lang.toUpperCase()} / {d.lang === "en" ? "DE" : "EN"}
-            </button>
+            <LanguageSelector />
           </div>
           <h2>{d.t(admin ? "Admin login" : "Business customer login")}</h2>
           <p>
@@ -114,7 +113,7 @@ export function LoginPage({ admin = false }) {
                       setError("");
                     }}
                   >
-                    <strong>{profileFor(d.state, u).name}</strong>
+                    <strong>{d.t(profileFor(d.state, u).name)}</strong>
                     <span>{u.name}</span>
                   </button>
                 ))}

@@ -76,7 +76,7 @@ export function QuickOrder({ ai = false }) {
           </label>
           {!ai && (
             <label className="file-label">
-              Upload CSV
+              {d.t("Upload CSV")}
               <input
                 type="file"
                 accept=".csv,text/csv"
@@ -90,18 +90,18 @@ export function QuickOrder({ ai = false }) {
             </label>
           )}
           <button className="primary" onClick={parse}>
-            Review order lines →
+            {d.t("Review order lines →")}
           </button>
         </section>
         <section className="panel">
-          <h2>Add an individual article</h2>
+          <h2>{d.t("Add an individual article")}</h2>
           <label>
-            Article number
+            {d.t("Article number")}
             <input
               list="skus"
               value={sku}
               onChange={(e) => setSku(e.target.value)}
-              placeholder="PNE-3201"
+              placeholder={d.t("PNE-3201")}
             />
             <datalist id="skus">
               {d.state.products
@@ -114,7 +114,7 @@ export function QuickOrder({ ai = false }) {
             </datalist>
           </label>
           <label>
-            Quantity
+            {d.t("Quantity")}
             <input
               type="number"
               min="1"
@@ -130,11 +130,12 @@ export function QuickOrder({ ai = false }) {
               else d.add(r.items);
             }}
           >
-            Add to cart
+            {d.t("Add to cart")}
           </button>
           <div className="notice">
-            Duplicate articles are combined into a single cart line. Invalid
-            quantities and unknown SKUs are skipped with feedback.
+            {d.t(
+              "Duplicate articles are combined into a single cart line. Invalid quantities and unknown SKUs are skipped with feedback.",
+            )}
           </div>
           <Link
             className="text-link"
@@ -166,7 +167,7 @@ export function QuickOrder({ ai = false }) {
               setResult(null);
             }}
           >
-            Add reviewed lines to cart
+            {d.t("Add reviewed lines to cart")}
           </button>
         </section>
       )}
@@ -199,17 +200,17 @@ export function Orders({ admin = false, approvals = false }) {
       <section className="panel">
         <div className="filter-row">
           <input
-            aria-label="Search orders"
-            placeholder="Search order, reference or company…"
+            aria-label={d.t("Search orders")}
+            placeholder={d.t("Search order, reference or company\u2026")}
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
           <select
-            aria-label="Filter status"
+            aria-label={d.t("Filter status")}
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
-            <option value="">All statuses</option>
+            <option value="">{d.t("All statuses")}</option>
             {[
               "pending_approval",
               "submitted",
@@ -236,7 +237,7 @@ export function OrderDetail({ admin = false }) {
   const o = d.state.orders.find(
     (o) => o.id === oid && (admin || o.companyId === d.company.id),
   );
-  if (!o) return <Empty>Order not found</Empty>;
+  if (!o) return <Empty>{d.t("Order not found")}</Empty>;
   const company = d.state.companies.find((c) => c.id === o.companyId);
   const change = (status) =>
     d.edit("orders", {
@@ -251,7 +252,7 @@ export function OrderDetail({ admin = false }) {
     <>
       <Heading
         title={o.number}
-        eyebrow="ORDER DETAIL"
+        eyebrow={d.t("ORDER DETAIL")}
         action={<Badge value={o.status} />}
       >
         {company.name} · {new Date(o.createdAt).toLocaleDateString("de-DE")} ·{" "}
@@ -354,12 +355,10 @@ export function OrderDetail({ admin = false }) {
             o.status === "pending_approval" && (
               <>
                 <button className="primary" onClick={() => change("submitted")}>
-                  {d.lang === "de"
-                    ? "Bestellung freigeben"
-                    : "Approve purchase"}
+                  {d.t("Approve purchase")}
                 </button>
                 <button className="danger" onClick={() => change("rejected")}>
-                  {d.lang === "de" ? "Bestellung ablehnen" : "Reject purchase"}
+                  {d.t("Reject purchase")}
                 </button>
               </>
             )}
@@ -421,8 +420,9 @@ export function OrderDetail({ admin = false }) {
         </div>
         {o.status === "pending_approval" && admin && (
           <div className="notice">
-            Customer administrator approval is required before fulfillment and
-            ERP push.
+            {d.t(
+              "Customer administrator approval is required before fulfillment and ERP push.",
+            )}
           </div>
         )}
       </section>
@@ -434,9 +434,10 @@ export function Invoices() {
   const invoices = d.state.invoices.filter((i) => i.companyId === d.company.id);
   return (
     <>
-      <Heading title="Your invoice center" eyebrow="FINANCE">
-        Watermarked sample documents. Genuine fiscal PDFs must come from Odoo in
-        production.
+      <Heading title={d.t("Your invoice center")} eyebrow={d.t("FINANCE")}>
+        {d.t(
+          "Watermarked sample documents. Genuine fiscal PDFs must come from Odoo in production.",
+        )}
       </Heading>
       <section className="panel">
         {invoices.length ? (
@@ -455,7 +456,7 @@ export function Invoices() {
                   <tr key={i.id}>
                     <td>
                       {i.number}
-                      <small>DEMO · NOT A FISCAL DOCUMENT</small>
+                      <small>{d.t("DEMO · NOT A FISCAL DOCUMENT")}</small>
                     </td>
                     <td>{new Date(i.date).toLocaleDateString("de-DE")}</td>
                     <td>{money(i.amount)}</td>
@@ -470,7 +471,8 @@ export function Invoices() {
                           )
                         }
                       >
-                        <Download size={16} /> Sample PDF
+                        <Download size={16} />
+                        {d.t("Sample PDF")}
                       </button>
                     </td>
                   </tr>
@@ -492,9 +494,13 @@ export function Templates() {
   );
   return (
     <>
-      <Heading title="Repeat the good orders." eyebrow="ORDER TEMPLATES">
-        Save a named template from your cart. Loading combines matching
-        articles.
+      <Heading
+        title={d.t("Repeat the good orders.")}
+        eyebrow={d.t("ORDER TEMPLATES")}
+      >
+        {d.t(
+          "Save a named template from your cart. Loading combines matching articles.",
+        )}
       </Heading>
       <div className="three-columns">
         {templates.map((t) => (
@@ -517,7 +523,7 @@ export function Templates() {
                 )
               }
             >
-              Load into cart
+              {d.t("Load into cart")}
             </button>
             <button
               className="text-link"
@@ -528,12 +534,12 @@ export function Templates() {
                 }))
               }
             >
-              Delete
+              {d.t("Delete")}
             </button>
           </section>
         ))}
       </div>
-      {!templates.length && <Empty>No saved templates yet</Empty>}
+      {!templates.length && <Empty>{d.t("No saved templates yet")}</Empty>}
     </>
   );
 }
@@ -543,8 +549,11 @@ export function Support() {
     [message, setMessage] = useState("");
   return (
     <>
-      <Heading title="Let’s keep things moving." eyebrow="SUPPORT">
-        Record an order exception or question as a local demo draft.
+      <Heading
+        title={d.t("Let\u2019s keep things moving.")}
+        eyebrow={d.t("SUPPORT")}
+      >
+        {d.t("Record an order exception or question as a local demo draft.")}
       </Heading>
       <section className="panel narrow">
         <form
@@ -569,7 +578,7 @@ export function Support() {
           }}
         >
           <label>
-            Subject / order reference
+            {d.t("Subject / order reference")}
             <input
               required
               value={subject}
@@ -577,7 +586,7 @@ export function Support() {
             />
           </label>
           <label>
-            How can we help?
+            {d.t("How can we help?")}
             <textarea
               required
               rows="5"
@@ -585,9 +594,9 @@ export function Support() {
               onChange={(e) => setMessage(e.target.value)}
             />
           </label>
-          <button className="primary">Save local support draft</button>
+          <button className="primary">{d.t("Save local support draft")}</button>
           <p className="notice">
-            No message is emailed or sent to a support team.
+            {d.t("No message is emailed or sent to a support team.")}
           </p>
         </form>
         {d.state.support

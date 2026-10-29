@@ -176,3 +176,7 @@ One functional gap against the concept PDF remains: customer administrators can 
 ### Create customer users and assign companies
 
 Open **Users & company access** from the admin sidebar or **Create / manage users** on the dashboard. Choose **Create user**, enter the name, email and public demo password, then select one or more companies. Each assignment has an independent Buyer/Customer Administrator role and active flag. **Edit user & companies** changes existing user details, account status and memberships; name/email search and a company filter help find users. Empty assignments, duplicate emails and invalid memberships are rejected. On customer login, only active assigned companies appear. Staff accounts remain under **Roles & permissions → Staff accounts**. These changes persist locally; no invitation email or real authentication service is involved.
+
+### Default interface language
+
+German (`de`, Deutsch) is the default, matching the original German project concept. English remains selectable. Preferences persist under `tradehub-language-v4`, superseding the earlier English default without changing business data. The HTML `lang` attribute follows the selection. Browser tests check the German default, migration from the earlier English preference, and German/English selection persistence.

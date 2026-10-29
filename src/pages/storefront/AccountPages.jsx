@@ -403,7 +403,7 @@ export function BulkOrder() {
   };
   return (
     <>
-      <Heading title={d.t("Quick order")} eyebrow="SKU / CSV">
+      <Heading title={d.t("Quick order")} eyebrow={d.t("SKU / CSV")}>
         {d.t("Turn your SKU list into an order in seconds.")}
       </Heading>
       <div className="two-columns">
@@ -547,10 +547,7 @@ export function BulkOrder() {
         </section>
       )}
       <Link className="text-link" to="/store/ai-preview">
-        {d.lang === "de"
-          ? "Textbestellung · Phase-3-Vorschau"
-          : "Text ordering · Phase 3 preview"}{" "}
-        →
+        {d.t("Text ordering · Phase 3 preview")} →
       </Link>
     </>
   );

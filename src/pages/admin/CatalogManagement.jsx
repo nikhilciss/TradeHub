@@ -251,7 +251,7 @@ export function CategoriesAdmin() {
                 type="url"
                 value={editing.image}
                 onChange={(e) => form("image", e.target.value)}
-                placeholder="https://…"
+                placeholder={d.t("https://\u2026")}
               />
             </label>
             <div className="two-columns">

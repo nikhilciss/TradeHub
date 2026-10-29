@@ -27,27 +27,28 @@ export function AdminDashboard() {
   return (
     <>
       <Heading
-        title="Your operation, connected."
-        eyebrow="OPERATIONS COMMAND CENTER"
+        title={d.t("Your operation, connected.")}
+        eyebrow={d.t("OPERATIONS COMMAND CENTER")}
         action={
           <Link className="primary" to="/admin/odoo">
-            Integration center ↗
+            {d.t("Integration center ↗")}
           </Link>
         }
       >
-        A shared view of customers, purchases and the ERP pipeline.
+        {d.t("A shared view of customers, purchases and the ERP pipeline.")}
       </Heading>
       {d.can("users") && (
         <section className="panel user-management-entry">
           <div>
-            <h2>Users & company access</h2>
+            <h2>{d.t("Users & company access")}</h2>
             <p>
-              Create customer logins, assign companies and manage purchasing
-              roles.
+              {d.t(
+                "Create customer logins, assign companies and manage purchasing roles.",
+              )}
             </p>
           </div>
           <Link className="primary" to="/admin/users">
-            Create / manage users →
+            {d.t("Create / manage users →")}
           </Link>
         </section>
       )}
@@ -80,7 +81,7 @@ export function AdminDashboard() {
       <div className="two-columns">
         <section className="panel">
           <div className="section-title">
-            <h2>Digital ordering momentum</h2>
+            <h2>{d.t("Digital ordering momentum")}</h2>
             <Badge value="illustrative" />
           </div>
           <div className="bar-chart">
@@ -92,13 +93,14 @@ export function AdminDashboard() {
             ))}
           </div>
           <p>
-            Illustrative activity, not analytics. Production goal: 50% portal
-            adoption within 12 months.
+            {d.t(
+              "Illustrative activity, not analytics. Production goal: 50% portal adoption within 12 months.",
+            )}
           </p>
         </section>
         <section className="integration-card">
           <Workflow size={30} />
-          <h2>One connected source of truth.</h2>
+          <h2>{d.t("One connected source of truth.")}</h2>
           <p>
             {
               d.state.orders.filter(
@@ -109,14 +111,15 @@ export function AdminDashboard() {
           </p>
           <Badge value="simulation_only" />
           <Link to="/admin/odoo">
-            Open Odoo integration <ArrowRight size={17} />
+            {d.t("Open Odoo integration")}
+            <ArrowRight size={17} />
           </Link>
         </section>
       </div>
       <section className="panel">
         <div className="section-title">
-          <h2>Open order queue</h2>
-          <Link to="/admin/orders">All orders →</Link>
+          <h2>{d.t("Open order queue")}</h2>
+          <Link to="/admin/orders">{d.t("All orders →")}</Link>
         </div>
         <OrderTable
           admin
@@ -153,22 +156,23 @@ export function Customers() {
   return (
     <>
       <Heading
-        title="Partnerships that work."
-        eyebrow="CUSTOMER ACCOUNTS"
+        title={d.t("Partnerships that work.")}
+        eyebrow={d.t("CUSTOMER ACCOUNTS")}
         action={
           <button className="primary" onClick={openNew}>
-            + Add company
+            {d.t("+ Add company")}
           </button>
         }
       >
-        Negotiated pricing and purchase controls apply immediately to future
-        orders.
+        {d.t(
+          "Negotiated pricing and purchase controls apply immediately to future orders.",
+        )}
       </Heading>
       <section className="panel">
         <input
           className="table-search"
-          aria-label="Search customers"
-          placeholder="Search companies or city…"
+          aria-label={d.t("Search customers")}
+          placeholder={d.t("Search companies or city\u2026")}
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
@@ -176,12 +180,12 @@ export function Customers() {
           <table>
             <thead>
               <tr>
-                <th>Company</th>
-                <th>Location</th>
-                <th>Tier</th>
-                <th>Discount</th>
-                <th>Approval limit</th>
-                <th>Status</th>
+                <th>{d.t("Company")}</th>
+                <th>{d.t("Location")}</th>
+                <th>{d.t("Tier")}</th>
+                <th>{d.t("Discount")}</th>
+                <th>{d.t("Approval limit")}</th>
+                <th>{d.t("Status")}</th>
                 <th />
               </tr>
             </thead>
@@ -227,7 +231,7 @@ export function Customers() {
                           setEditing({ ...c });
                         }}
                       >
-                        Edit
+                        {d.t("Edit")}
                       </button>
                     </td>
                   </tr>
@@ -266,7 +270,7 @@ export function Customers() {
                     ["city", "City"],
                   ].map(([key, label]) => (
                     <label key={key}>
-                      {label}
+                      {d.t(label)}
                       <input
                         required
                         value={editing[key]}
@@ -277,16 +281,16 @@ export function Customers() {
                     </label>
                   ))}
                   <label>
-                    Country
+                    {d.t("Country")}
                     <select
                       value={editing.country}
                       onChange={(e) =>
                         setEditing({ ...editing, country: e.target.value })
                       }
                     >
-                      <option value="DE">Germany</option>
-                      <option value="AT">Austria</option>
-                      <option value="CH">Switzerland</option>
+                      <option value="DE">{d.t("Germany")}</option>
+                      <option value="AT">{d.t("Austria")}</option>
+                      <option value="CH">{d.t("Switzerland")}</option>
                     </select>
                   </label>
                 </div>
@@ -296,7 +300,7 @@ export function Customers() {
                     ["postalCode", "Postal code"],
                   ].map(([key, label]) => (
                     <label key={key}>
-                      {label}
+                      {d.t(label)}
                       <input
                         required
                         value={editing.billingAddress[key]}
@@ -314,12 +318,12 @@ export function Customers() {
                   ))}
                 </div>
                 <p className="notice">
-                  This address will be used as the initial billing and delivery
-                  address. Assign users through Users & company access after
-                  saving.
+                  {d.t(
+                    "This address will be used as the initial billing and delivery address. Assign users through Users & company access after saving.",
+                  )}
                 </p>
                 <label>
-                  Credit limit (EUR)
+                  {d.t("Credit limit (EUR)")}
                   <input
                     type="number"
                     required
@@ -336,7 +340,7 @@ export function Customers() {
               </>
             )}
             <label>
-              Contract tier
+              {d.t("Contract tier")}
               <select
                 value={editing.tier}
                 onChange={(e) =>
@@ -349,7 +353,7 @@ export function Customers() {
               </select>
             </label>
             <label>
-              Discount (%)
+              {d.t("Discount (%)")}
               <input
                 required
                 type="number"
@@ -362,7 +366,7 @@ export function Customers() {
               />
             </label>
             <label>
-              Purchase approval threshold (EUR)
+              {d.t("Purchase approval threshold (EUR)")}
               <input
                 required
                 type="number"
@@ -384,7 +388,7 @@ export function Customers() {
                   setEditing({ ...editing, active: e.target.checked })
                 }
               />
-              Account approved
+              {d.t("Account approved")}
             </label>
             {error && (
               <p className="error" role="alert">
@@ -392,7 +396,7 @@ export function Customers() {
               </p>
             )}
             <button className="primary">
-              {isNew ? "Create company" : "Save contract"}
+              {d.t(isNew ? "Create company" : "Save contract")}
             </button>
           </form>
         </Modal>
@@ -407,13 +411,17 @@ export function Settings() {
     [error, setError] = useState("");
   return (
     <>
-      <Heading title="Make this workspace yours." eyebrow="PORTAL SETTINGS">
-        Snapshots and configuration belong to this browser. No shared database
-        or cross-browser synchronization.
+      <Heading
+        title={d.t("Make this workspace yours.")}
+        eyebrow={d.t("PORTAL SETTINGS")}
+      >
+        {d.t(
+          "Snapshots and configuration belong to this browser. No shared database or cross-browser synchronization.",
+        )}
       </Heading>
       <div className="two-columns">
         <section className="panel">
-          <h2>Portal preferences</h2>
+          <h2>{d.t("Portal preferences")}</h2>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -429,7 +437,7 @@ export function Settings() {
             }}
           >
             <label>
-              Portal name
+              {d.t("Portal name")}
               <input
                 name="name"
                 required
@@ -437,7 +445,7 @@ export function Settings() {
               />
             </label>
             <label>
-              Default approval limit (EUR)
+              {d.t("Default approval limit (EUR)")}
               <input
                 name="limit"
                 required
@@ -446,15 +454,16 @@ export function Settings() {
                 defaultValue={d.state.settings.approvalThreshold}
               />
             </label>
-            <p>Company-specific limits override this default.</p>
-            <button className="primary">Save settings</button>
+            <p>{d.t("Company-specific limits override this default.")}</p>
+            <button className="primary">{d.t("Save settings")}</button>
           </form>
         </section>
         <section className="panel">
-          <h2>Your demo data</h2>
+          <h2>{d.t("Your demo data")}</h2>
           <p>
-            Export a full snapshot, or manually import it in another browser.
-            Deployed seed files are read-only.
+            {d.t(
+              "Export a full snapshot, or manually import it in another browser. Deployed seed files are read-only.",
+            )}
           </p>
           <button
             className="secondary"
@@ -472,10 +481,10 @@ export function Settings() {
             }}
           >
             <Download size={16} />
-            Export JSON snapshot
+            {d.t("Export JSON snapshot")}
           </button>
           <label className="file-label">
-            Import snapshot JSON
+            {d.t("Import snapshot JSON")}
             <input
               type="file"
               accept=".json,application/json"
@@ -499,25 +508,30 @@ export function Settings() {
             </p>
           )}
           <hr />
-          <h3>Start fresh</h3>
+          <h3>{d.t("Start fresh")}</h3>
           <p>
-            Restore the original 54 products and six companies. Export first to
-            preserve your work.
+            {d.t(
+              "Restore the original 54 products and six companies. Export first to preserve your work.",
+            )}
           </p>
           <button className="danger" onClick={() => setReset(true)}>
-            Reset demo data
+            {d.t("Reset demo data")}
           </button>
         </section>
       </div>
       {reset && (
-        <Modal title="Restore original seed?" onClose={() => setReset(false)}>
+        <Modal
+          title={d.t("Restore original seed?")}
+          onClose={() => setReset(false)}
+        >
           <p>
-            This replaces local orders, cart, configuration and all other demo
-            edits.
+            {d.t(
+              "This replaces local orders, cart, configuration and all other demo edits.",
+            )}
           </p>
           <div className="inline">
             <button className="secondary" onClick={() => setReset(false)}>
-              Cancel
+              {d.t("Cancel")}
             </button>
             <button
               className="danger"
@@ -526,7 +540,7 @@ export function Settings() {
                 setReset(false);
               }}
             >
-              Restore seed data
+              {d.t("Restore seed data")}
             </button>
           </div>
         </Modal>
@@ -541,16 +555,17 @@ export function Sales() {
   return (
     <>
       <Heading
-        title="Closer to your customers."
-        eyebrow="PHASE 2 · FIELD SALES PREVIEW"
+        title={d.t("Closer to your customers.")}
+        eyebrow={d.t("PHASE 2 \u00b7 FIELD SALES PREVIEW")}
       >
-        Responsive browser preview. No native app, camera scanner or real
-        offline synchronization.
+        {d.t(
+          "Responsive browser preview. No native app, camera scanner or real offline synchronization.",
+        )}
       </Heading>
       <div className="two-columns">
         <section className="panel">
           <label>
-            Customer account
+            {d.t("Customer account")}
             <select
               value={d.company.id}
               onChange={(e) => d.setCompanyId(e.target.value)}
@@ -569,30 +584,30 @@ export function Sales() {
             {d.company.city}, {d.company.country} · {d.company.tier} partner
           </p>
           <div className="summary-line">
-            <span>Contract discount</span>
+            <span>{d.t("Contract discount")}</span>
             <b>{d.company.discount}%</b>
           </div>
           <div className="summary-line">
-            <span>Approval limit</span>
+            <span>{d.t("Approval limit")}</span>
             <b>{money(d.company.approvalThreshold)}</b>
           </div>
           <div className="summary-line">
-            <span>Credit limit · illustrative</span>
+            <span>{d.t("Credit limit · illustrative")}</span>
             <b>{money(d.company.creditLimit)}</b>
           </div>
           <Link className="text-link" to="/store/catalog">
-            Browse with this customer’s pricing →
+            {d.t("Browse with this customer’s pricing →")}
           </Link>
         </section>
         <section className="panel">
           <div className="section-title">
-            <h2>On-site order</h2>
+            <h2>{d.t("On-site order")}</h2>
             <button className="secondary" onClick={() => setOffline(!offline)}>
-              {offline ? "Reconnect preview" : "Simulate offline"}
+              {d.t(offline ? "Reconnect preview" : "Simulate offline")}
             </button>
           </div>
           <label>
-            SKU,quantity
+            {d.t("SKU,quantity")}
             <textarea
               rows="4"
               value={text}
@@ -619,16 +634,19 @@ export function Sales() {
               } else d.add(r.items);
             }}
           >
-            {offline ? "Save offline preview draft" : "Add to customer cart"}
+            {d.t(
+              offline ? "Save offline preview draft" : "Add to customer cart",
+            )}
           </button>
           <p>
-            Barcode scanner: future native capability, unavailable in this
-            preview.
+            {d.t(
+              "Barcode scanner: future native capability, unavailable in this preview.",
+            )}
           </p>
         </section>
       </div>
       <section className="panel">
-        <h2>Local draft queue</h2>
+        <h2>{d.t("Local draft queue")}</h2>
         {d.state.drafts
           .filter((x) => x.companyId === d.company.id)
           .map((x) => (
@@ -647,16 +665,16 @@ export function Sales() {
                   }));
                 }}
               >
-                Move to cart
+                {d.t("Move to cart")}
               </button>
             </div>
           ))}
         {!d.state.drafts.some((x) => x.companyId === d.company.id) && (
-          <p>No queued drafts for this customer.</p>
+          <p>{d.t("No queued drafts for this customer.")}</p>
         )}
       </section>
       <section className="panel">
-        <h2>Customer purchase history</h2>
+        <h2>{d.t("Customer purchase history")}</h2>
         <OrderTable
           orders={d.state.orders.filter((o) => o.companyId === d.company.id)}
         />

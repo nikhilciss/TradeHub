@@ -59,7 +59,7 @@ export function AIConfiguration() {
     <>
       <Heading
         title={d.t("AI configuration")}
-        eyebrow="ORDER INTELLIGENCE"
+        eyebrow={d.t("ORDER INTELLIGENCE")}
         action={<Badge value={testing ? "testing" : d.state.aiConfig.status} />}
       >
         {d.t(
@@ -83,10 +83,14 @@ export function AIConfiguration() {
                 value={config.provider}
                 onChange={(e) => set("provider", e.target.value)}
               >
-                <option value="local_demo">Local demo parser</option>
-                <option value="openai">OpenAI · planned</option>
-                <option value="azure_openai">Azure OpenAI · planned</option>
-                <option value="custom">Custom provider · planned</option>
+                <option value="local_demo">{d.t("Local demo parser")}</option>
+                <option value="openai">{d.t("OpenAI · planned")}</option>
+                <option value="azure_openai">
+                  {d.t("Azure OpenAI · planned")}
+                </option>
+                <option value="custom">
+                  {d.t("Custom provider · planned")}
+                </option>
               </select>
             </label>
             {field("endpoint", "Demo API endpoint", "url", { required: true })}
@@ -108,7 +112,7 @@ export function AIConfiguration() {
                 autoComplete="off"
                 value={secret}
                 onChange={(e) => setSecret(e.target.value)}
-                placeholder="DEMO-ONLY"
+                placeholder={d.t("DEMO-ONLY")}
               />
               <small>
                 {d.t("Never saved to localStorage or exported snapshots.")}

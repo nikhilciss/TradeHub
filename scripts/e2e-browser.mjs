@@ -155,6 +155,31 @@ async function download(text) {
 }
 try {
   await page.call("Page.enable");
+  await step(
+    "German default replaces English preference and English remains selectable",
+    async () => {
+      await go("/login");
+      assert.ok((await body()).includes("Geschäftskunden-Anmeldung"));
+      assert.equal(await evaluate("document.documentElement.lang"), "de");
+      await evaluate(
+        `localStorage.setItem('tradehub-language-v3','en');localStorage.removeItem('tradehub-language-v4')`,
+      );
+      await go("/login");
+      assert.equal(await evaluate("document.documentElement.lang"), "de");
+      await fillSelector(".language-select", "en");
+      await go("/login");
+      assert.equal(await evaluate("document.documentElement.lang"), "en");
+      assert.ok((await body()).includes("Business customer login"));
+      await fillSelector(".language-select", "de");
+      await go("/login");
+      assert.ok((await body()).includes("Geschäftskunden-Anmeldung"));
+      await fillSelector(".language-select", "en");
+    },
+  );
+  await page.call("Page.addScriptToEvaluateOnNewDocument", {
+    source:
+      "if (!localStorage.getItem('tradehub-language-v4')) localStorage.setItem('tradehub-language-v4','en');",
+  });
   await page.call("Runtime.enable");
   await page.call("Network.enable");
   await browser.call("Browser.setDownloadBehavior", {
@@ -604,10 +629,10 @@ try {
           await evaluate(`!document.querySelector('.${name}-dropdown').open`),
         );
       }
-      await evaluate(`document.querySelector('.language').click()`);
+      await fillSelector(".language-select", "de");
       await sleep(100);
       assert.ok((await body()).includes("Schnellbestellung"));
-      await evaluate(`document.querySelector('.language').click()`);
+      await fillSelector(".language-select", "en");
       await sleep(100);
     },
   );

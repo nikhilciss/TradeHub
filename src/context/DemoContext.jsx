@@ -40,7 +40,7 @@ import {
   safeConnection,
   logEntry,
 } from "../services/odooService";
-import { translate } from "../utils/i18n";
+import { translate, supportedLanguages, defaultLanguage } from "../utils/i18n";
 import {
   companiesForUser,
   resolveCompany,
@@ -106,7 +106,9 @@ export function DemoProvider({ children }) {
     setSession({ userId, companyId: cid });
   };
   const [lang, setLang] = useState(() =>
-    read("tradehub-lang", "en") === "de" ? "de" : "en",
+    supportedLanguages.includes(read("tradehub-language-v4"))
+      ? read("tradehub-language-v4")
+      : defaultLanguage,
   );
   const [toast, setToast] = useState("");
   const identity = state.users.find((u) => u.id === userId && u.active);
@@ -138,7 +140,7 @@ export function DemoProvider({ children }) {
     persist("tradehub-session-v3", JSON.stringify(session));
   }, [session]);
   useEffect(() => {
-    persist("tradehub-lang", lang);
+    persist("tradehub-language-v4", lang);
     document.documentElement.lang = lang;
   }, [lang]);
   useEffect(() => {

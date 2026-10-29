@@ -33,7 +33,7 @@ const session = (user = "", lang = "en", state = seed, companyId = "c1") => {
     "tradehub-demo-v4": JSON.stringify(state),
     "tradehub-session-v3": JSON.stringify({ userId: user, companyId }),
     "tradehub-user": user,
-    "tradehub-lang": lang,
+    "tradehub-language-v4": lang,
   };
 };
 let count = 0;
@@ -78,7 +78,7 @@ let html = check("/");
 assert.ok(html.includes("Business customer login"));
 assert.ok(!html.includes("admin@demo.tradehub"));
 assert.ok(html.includes('href="/admin/login"'));
-assert.ok(!html.includes("<select"));
+assert.ok(!html.includes("Switch demo persona"));
 assert.ok(!html.includes("Field sales"));
 html = check("/login");
 assert.ok(html.includes("Business customer login"));
@@ -90,7 +90,7 @@ assert.ok(html.includes("Back to B2B customer login"));
 assert.ok(html.includes('href="/login"'));
 assert.ok(html.includes("Inside sales"));
 assert.ok(html.includes("Field sales"));
-assert.ok(!html.includes("<select"));
+assert.ok(!html.includes("Switch demo persona"));
 html = check("/companies", "u1", "en", seed, "");
 assert.ok(html.includes("Müller Maschinenbau"));
 assert.ok(html.includes("Alpen Technik"));

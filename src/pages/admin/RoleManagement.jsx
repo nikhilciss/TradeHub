@@ -47,7 +47,7 @@ export function RoleManagement() {
     <>
       <Heading
         title={d.t("Roles & permissions")}
-        eyebrow="ACCESS MANAGEMENT"
+        eyebrow={d.t("ACCESS MANAGEMENT")}
         action={
           <button
             className="primary"

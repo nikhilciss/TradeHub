@@ -1,3 +1,6 @@
+import { nl } from "./nl.js";
+export const supportedLanguages = ["en", "de"];
+export const defaultLanguage = "de";
 export const labels = {
   en: {
     Overview: "Overview",
@@ -474,6 +477,7 @@ const de = {
   Cart: "Warenkorb",
 };
 export function translate(lang, key) {
+  if (lang === "nl") return nl[key] || key;
   return lang === "de"
     ? de[key] || labels.de[key] || key
     : labels.en[key] || key;
@@ -580,4 +584,21 @@ Object.assign(de, {
     "Wählen Sie Unternehmen und die jeweilige Rolle.",
   "Select at least one company.": "Wählen Sie mindestens ein Unternehmen.",
   "Company access updated": "Unternehmenszugriff aktualisiert",
+});
+
+Object.assign(de, {
+  "Existing WordPress remains unchanged. Future portal subdomain and exact Odoo fields require ERP partner validation.":
+    "Die bestehende WordPress-Seite bleibt unverändert. Die künftige Portal-Subdomain und Odoo-Felder sind mit dem ERP-Partner abzustimmen.",
+  "Authentication method and API availability depend on the actual Odoo deployment. This demo does not verify credentials.":
+    "Authentifizierungsmethode und API-Verfügbarkeit hängen von der tatsächlichen Odoo-Bereitstellung ab. Diese Demo prüft keine Zugangsdaten.",
+  "Intervals are saved demo configuration; no background jobs run.":
+    "Intervalle sind gespeicherte Demo-Konfiguration; es laufen keine Hintergrundjobs.",
+  "Pricelist hierarchy, stock reservations, company isolation and invoice access: validation pending.":
+    "Preislisten-Hierarchie, Bestandsreservierungen, Mandantenbezug und Rechnungszugriff: Prüfung ausstehend.",
+});
+
+Object.assign(de, {
+  "Your products. Your prices. Your business.":
+    "Ihr Sortiment. Ihre Preise. Ihr Geschäft.",
+  "One view. Every operation.": "Ein Überblick. Alle Abläufe.",
 });

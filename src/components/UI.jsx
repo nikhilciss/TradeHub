@@ -1,3 +1,4 @@
+import { LanguageSelector } from "./LanguageSelector";
 import { routePermissions, staffLanding } from "../services/roleService";
 import React, { useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
@@ -51,12 +52,15 @@ export function Heading({
   children,
   action,
 }) {
+  const { t } = useDemo();
   return (
     <div className="heading">
       <div>
-        <div className="eyebrow">{eyebrow}</div>
-        <h1>{title}</h1>
-        {children && <p>{children}</p>}
+        <div className="eyebrow">{t(eyebrow)}</div>
+        <h1>{t(title)}</h1>
+        {children && (
+          <p>{typeof children === "string" ? t(children) : children}</p>
+        )}
       </div>
       {action}
     </div>
@@ -73,13 +77,14 @@ export function Empty({ children = "No records found." }) {
   );
 }
 export function Modal({ title, children, onClose }) {
+  const { t } = useDemo();
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <section
         className="modal"
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-label={t(title)}
         onClick={(e) => e.stopPropagation()}
         onKeyDown={(e) => {
           if (e.key === "Escape") onClose();
@@ -100,11 +105,11 @@ export function Modal({ title, children, onClose }) {
         }}
       >
         <div className="section-title">
-          <h2>{title}</h2>
+          <h2>{t(title)}</h2>
           <button
             autoFocus
             className="icon-btn"
-            aria-label="Close dialog"
+            aria-label={t("Close dialog")}
             onClick={onClose}
           >
             ×
@@ -367,7 +372,7 @@ export function Shell() {
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <div className="connection-dot">Browser-local demo</div>
+          <div className="connection-dot">{d.t("Browser-local demo")}</div>
           <p>
             Fictional brand. Real possibilities.
             <br />
@@ -404,19 +409,14 @@ export function Shell() {
             <Search size={18} />
             <input
               aria-label="Search products"
-              placeholder="Search products, brands or article numbers…"
+              placeholder={d.t("Search products, brands or article numbers…")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
             <kbd>↵</kbd>
           </form>
           <div className="toolbar-actions">
-            <button
-              className="language"
-              onClick={() => d.setLang(d.lang === "en" ? "de" : "en")}
-            >
-              {d.lang.toUpperCase()} / {d.lang === "en" ? "DE" : "EN"}
-            </button>
+            <LanguageSelector />
             {!admin && (
               <Link className="cart-button" aria-label="Cart" to="/store/cart">
                 <ShoppingCart size={20} />

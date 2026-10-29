@@ -1,3 +1,4 @@
+import { LanguageSelector } from "../../components/LanguageSelector";
 import React from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Building2, ArrowRight, LogOut, ShieldCheck } from "lucide-react";
@@ -11,15 +12,11 @@ export function CompanySelection() {
     <div className="company-selection">
       <header>
         <Link className="shop-logo" to="/companies">
-          tradehub<span className="brand-dot">.</span>
+          {d.t("tradehub")}
+          <span className="brand-dot">.</span>
         </Link>
         <div className="inline">
-          <button
-            className="language"
-            onClick={() => d.setLang(d.lang === "en" ? "de" : "en")}
-          >
-            {d.lang.toUpperCase()} / {d.lang === "en" ? "DE" : "EN"}
-          </button>
+          <LanguageSelector />
           <button
             className="secondary"
             onClick={() => {

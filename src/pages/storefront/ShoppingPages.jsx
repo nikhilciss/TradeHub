@@ -69,7 +69,7 @@ export function ShopHome() {
       <section className="commerce-hero">
         <div className="commerce-hero-copy">
           <span className="eyebrow">
-            TRADEHUB / PROFESSIONAL INDUSTRIAL SUPPLY
+            {d.t("TRADEHUB / PROFESSIONAL INDUSTRIAL SUPPLY")}
           </span>
           <h1>{d.t("Precision for your next project.")}</h1>
           <p>
@@ -105,11 +105,11 @@ export function ShopHome() {
             <ProductImage product={{ category: "Tools" }} large />
           </div>
           <span className="industrial-caption">
-            01 / ENGINEERED FOR YOUR EVERYDAY
+            {d.t("01 / ENGINEERED FOR YOUR EVERYDAY")}
           </span>
           <div className="hero-stock-tag">
             <span>●</span> {d.t("Reliable availability")}
-            <small>Precision. Performance. Partnership.</small>
+            <small>{d.t("Precision. Performance. Partnership.")}</small>
           </div>
         </div>
       </section>
@@ -133,7 +133,7 @@ export function ShopHome() {
       <section id="shop-categories" className="shop-section">
         <div className="section-title">
           <div className="section-heading">
-            <span className="eyebrow">THE RIGHT PART STARTS HERE</span>
+            <span className="eyebrow">{d.t("THE RIGHT PART STARTS HERE")}</span>
             <h2>{d.t("Shop by category")}</h2>
           </div>
           <Link to="/store/catalog">{d.t("View all")} →</Link>
@@ -149,7 +149,7 @@ export function ShopHome() {
       <section className="shop-section">
         <div className="section-title">
           <div>
-            <span className="eyebrow">SELECTED FOR YOUR BUSINESS</span>
+            <span className="eyebrow">{d.t("SELECTED FOR YOUR BUSINESS")}</span>
             <h2>{d.t("Featured products")}</h2>
           </div>
           <Link to="/store/catalog">{d.t("View all")} →</Link>
@@ -169,7 +169,7 @@ export function ShopHome() {
           to={"/store/catalog?category=" + (target?.id || "")}
         >
           <div>
-            <span className="eyebrow">SMARTER PRODUCTION</span>
+            <span className="eyebrow">{d.t("SMARTER PRODUCTION")}</span>
             <h2>{categoryName(target, d.lang)}</h2>
             <p>{d.t("Ready for the next shift.")}</p>
             <strong>{d.t("Shop the collection")} →</strong>
@@ -177,7 +177,7 @@ export function ShopHome() {
           <ProductImage product={{ category: "Electrical" }} />
         </Link>
         <Link className="promo-workshop" to="/store/quick-order">
-          <span className="eyebrow">LESS ADMIN. MORE PROGRESS.</span>
+          <span className="eyebrow">{d.t("LESS ADMIN. MORE PROGRESS.")}</span>
           <h2>{d.t("Bulk ordering made easy")}</h2>
           <p>{d.t("Turn your SKU list into an order in seconds.")}</p>
           <strong>{d.t("Quick order")} →</strong>
@@ -295,7 +295,7 @@ export function ShopCatalog({ favorites = false }) {
   return (
     <>
       <div className="shop-breadcrumb">
-        <Link to="/store">TradeHub</Link> /{" "}
+        <Link to="/store">{d.t("TradeHub")}</Link> /{" "}
         {d.t(favorites ? "Favorites" : "Products")}{" "}
         {category && " / " + categoryName(category, d.lang)}
       </div>
@@ -307,7 +307,7 @@ export function ShopCatalog({ favorites = false }) {
               ? categoryName(category, d.lang)
               : d.t("Products for every working day.")
         }
-        eyebrow="INDUSTRIAL SUPPLY"
+        eyebrow={d.t("INDUSTRIAL SUPPLY")}
       >
         {results.length} {d.t("products")}
         {d.user && ` · ${d.company.name}`}
@@ -769,7 +769,7 @@ export function ShopCart({ checkout = false }) {
   return (
     <>
       <div className="shop-breadcrumb">
-        <Link to="/store">TradeHub</Link> /{" "}
+        <Link to="/store">{d.t("TradeHub")}</Link> /{" "}
         <Link to="/store/cart">{d.t("Cart")}</Link>
         {checkout && " / " + d.t("Checkout")}
       </div>
@@ -915,7 +915,7 @@ export function ShopCart({ checkout = false }) {
                       <input
                         value={reference}
                         onChange={(e) => setReference(e.target.value)}
-                        placeholder="PO-2026-001"
+                        placeholder={d.t("PO-2026-001")}
                       />
                     </label>
                     <label>

@@ -2448,3 +2448,18 @@
     flex-direction: column;
   }
 }
+.language-select {
+  max-width: 145px;
+  min-height: 36px;
+  padding: 7px 24px 7px 8px;
+  background-color: #fff;
+  border: 1px solid #d7e0e5;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+}
+@media (max-width: 600px) {
+  .shop-header-tools .language-select {
+    width: 68px;
+  }
+}

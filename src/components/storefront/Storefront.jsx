@@ -1,3 +1,5 @@
+import { translate } from "../../utils/i18n";
+import { LanguageSelector } from "../LanguageSelector";
 import React, { useState, useRef, useEffect } from "react";
 import {
   Link,
@@ -26,7 +28,9 @@ import { Art } from "../UI";
 import { money } from "../../services/domain";
 import { categoryVisible } from "../../services/catalogService";
 export const categoryName = (category, lang) =>
-  lang === "de" ? category?.nameDe || category?.name : category?.name;
+  lang === "de"
+    ? category?.nameDe || category?.name
+    : translate(lang, category?.name);
 export function ProductImage({ product, index = 0, large = false }) {
   const [failed, setFailed] = useState("");
   const url = product.images?.[index] || product.image;
@@ -323,12 +327,7 @@ export function StorefrontShell() {
             </button>
           </form>
           <div className="shop-header-tools">
-            <button
-              className="language"
-              onClick={() => d.setLang(d.lang === "en" ? "de" : "en")}
-            >
-              {d.lang.toUpperCase()} ▾
-            </button>
+            <LanguageSelector />
             {d.user ? (
               <details className="account-dropdown" ref={accountDropdown}>
                 <summary>
@@ -486,9 +485,9 @@ export function StorefrontShell() {
         <div>
           <b>TradeHub · DACH</b>
           <p>
-            Fictional demonstration brand
+            {d.t("Fictional demonstration brand")}
             <br />
-            Deutschland · Österreich · Schweiz
+            {d.t("Germany · Austria · Switzerland")}
           </p>
           <small>{d.t("VAT and shipping calculated in Odoo.")}</small>
         </div>

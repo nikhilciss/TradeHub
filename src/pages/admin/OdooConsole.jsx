@@ -20,7 +20,9 @@ export function OdooConsole() {
     odoo = d.state.odoo,
     stamp = (value) =>
       value
-        ? new Date(value).toLocaleString(d.lang === "de" ? "de-DE" : "en-GB")
+        ? new Date(value).toLocaleString(
+            d.lang === "nl" ? "nl-NL" : d.lang === "de" ? "de-DE" : "en-GB",
+          )
         : t("Never");
   const change = (key, value) => setConfig({ ...config, [key]: value });
   const frequency = (name, value) => {
@@ -56,7 +58,7 @@ export function OdooConsole() {
     <>
       <Heading
         title={t("ERP configuration console")}
-        eyebrow="ODOO 17 / INTEGRATION"
+        eyebrow={d.t("ODOO 17 / INTEGRATION")}
         action={
           <button
             className="primary"
@@ -123,23 +125,23 @@ export function OdooConsole() {
           <section className="flow">
             <div>
               <Monitor />
-              <span>EXPERIENCE</span>
-              <h3>React B2B Storefront</h3>
-              <p>Buyer / Admin</p>
+              <span>{d.t("EXPERIENCE")}</span>
+              <h3>{d.t("React B2B Storefront")}</h3>
+              <p>{d.t("Buyer / Admin")}</p>
             </div>
             <b>↔</b>
             <div>
               <Server />
-              <span>FUTURE API</span>
-              <h3>Express / Node adapter</h3>
-              <p>Tenant permissions · queue · mapping</p>
+              <span>{d.t("FUTURE API")}</span>
+              <h3>{d.t("Express / Node adapter")}</h3>
+              <p>{d.t("Tenant permissions · queue · mapping")}</p>
             </div>
             <b>↔</b>
             <div>
               <Database />
-              <span>SYSTEM OF RECORD</span>
-              <h3>Odoo 17 ERP</h3>
-              <p>Products · contracts · orders</p>
+              <span>{d.t("SYSTEM OF RECORD")}</span>
+              <h3>{d.t("Odoo 17 ERP")}</h3>
+              <p>{d.t("Products · contracts · orders")}</p>
             </div>
           </section>
           <div className="two-columns">
@@ -188,9 +190,9 @@ export function OdooConsole() {
                 )}
               </button>
               <p>
-                {d.lang === "de"
-                  ? "Die bestehende WordPress-Seite bleibt unverändert. Die künftige Portal-Subdomain und Odoo-Felder sind mit dem ERP-Partner abzustimmen."
-                  : "Existing WordPress remains unchanged. Future portal subdomain and exact Odoo fields require ERP partner validation."}
+                {d.t(
+                  "Existing WordPress remains unchanged. Future portal subdomain and exact Odoo fields require ERP partner validation.",
+                )}
               </p>
             </section>
           </div>
@@ -247,7 +249,7 @@ export function OdooConsole() {
                   type="password"
                   autoComplete="off"
                   value={secret}
-                  placeholder="DEMO-ONLY"
+                  placeholder={d.t("DEMO-ONLY")}
                   onChange={(e) => setSecret(e.target.value)}
                 />
                 <small>
@@ -284,9 +286,9 @@ export function OdooConsole() {
               </label>
             </div>
             <p className="notice">
-              {d.lang === "de"
-                ? "Authentifizierungsmethode und API-Verfügbarkeit hängen von der tatsächlichen Odoo-Bereitstellung ab. Diese Demo prüft keine Zugangsdaten."
-                : "Authentication method and API availability depend on the actual Odoo deployment. This demo does not verify credentials."}
+              {d.t(
+                "Authentication method and API availability depend on the actual Odoo deployment. This demo does not verify credentials.",
+              )}
             </p>
             {error && (
               <p className="error" role="alert">
@@ -343,9 +345,9 @@ export function OdooConsole() {
             {t("Near-real-time order target; master data at least hourly.")}
           </p>
           <p>
-            {d.lang === "de"
-              ? "Intervalle sind gespeicherte Demo-Konfiguration; es laufen keine Hintergrundjobs."
-              : "Intervals are saved demo configuration; no background jobs run."}
+            {d.t(
+              "Intervals are saved demo configuration; no background jobs run.",
+            )}
           </p>
           <div className="table-scroll">
             <table>
@@ -514,9 +516,9 @@ export function OdooConsole() {
             </table>
           </div>
           <p>
-            {d.lang === "de"
-              ? "Preislisten-Hierarchie, Bestandsreservierungen, Mandantenbezug und Rechnungszugriff: Prüfung ausstehend."
-              : "Pricelist hierarchy, stock reservations, company isolation and invoice access: validation pending."}
+            {d.t(
+              "Pricelist hierarchy, stock reservations, company isolation and invoice access: validation pending.",
+            )}
           </p>
         </section>
       )}
@@ -668,7 +670,7 @@ export function OdooConsole() {
           </h3>
           <p>{details.details}</p>
           <dl className="specifications">
-            <dt>Sync ID</dt>
+            <dt>{d.t("Sync ID")}</dt>
             <dd>{details.id}</dd>
             <dt>{t("Records processed")}</dt>
             <dd>{details.recordsProcessed}</dd>

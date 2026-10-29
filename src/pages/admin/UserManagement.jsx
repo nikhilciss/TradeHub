@@ -44,7 +44,7 @@ export function UserManagement() {
     <>
       <Heading
         title={d.t("Users & company access")}
-        eyebrow="CUSTOMER USER MANAGEMENT"
+        eyebrow={d.t("CUSTOMER USER MANAGEMENT")}
         action={
           <button className="primary" onClick={() => open()}>
             {d.t("Create user")}
